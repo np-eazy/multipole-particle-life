@@ -1,6 +1,7 @@
+import { decayRate } from "./Physics";
 import { Orientation } from "./utils";
 
-export const particleTypes = ["RED", "GREEN", "BLUE"];
+export const particleTypes = ["RED", "GREEN", "BLUE", "MAGENTA", "GOLD"];
 
 export class Particle {
     id: string;
@@ -14,8 +15,8 @@ export class Particle {
     forceTorque: Orientation;
     deleted: boolean;
 
-    constructor(params: {particleType: string, mass: number, radius: number, momentCoefficient: number, position: Orientation, velocity?: Orientation}) {
-        this.id = Date.now().toString();
+    constructor(params: {id?: string, particleType: string, mass: number, radius: number, momentCoefficient: number, position: Orientation, velocity?: Orientation, forceTorque?: Orientation}) {
+        this.id = params.id ?? (Date.now() + Math.random() * 100000).toString();
         this.dimension = params.position.x.length;
         this.mass = params.mass;
         this.radius = params.radius;
@@ -23,7 +24,7 @@ export class Particle {
         this.particleType = params.particleType;
         this.position = params.position;
         this.velocity = params.velocity ?? new Orientation(this.dimension);
-        this.forceTorque = new Orientation(this.dimension);
+        this.forceTorque = params.forceTorque ?? new Orientation(this.dimension);
         this.deleted = false;
     }
 
@@ -37,6 +38,8 @@ export class Particle {
         // TODO: handle torque
         this.velocity.addX(this.forceTorque);
         this.position.addX(this.velocity);
+        this.velocity.scaleX(1 - h * decayRate);
+
         this.forceTorque = new Orientation(this.dimension);
     }
 

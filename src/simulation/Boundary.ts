@@ -47,8 +47,8 @@ export const circularClosedBounds = (size: number) => new Boundary({
     },
     outOfBoundsCallback: (particle: Particle) => {
         particle.position.normalize();
-        particle.position.scaleX(size * 0.99999);
         particle.velocity.reflect(particle.position);
+        particle.position.scaleX(size * 0.999);
     }
 });
 
