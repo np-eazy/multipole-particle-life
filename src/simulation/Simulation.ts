@@ -1,9 +1,8 @@
-import { sample2DGaussian } from "./utils";
-import { Boundary, unitSquare } from "./Boundary";
+import { Orientation, sample2DGaussian } from "./utils";
+import { Boundary, squareBounds } from "./Boundary";
 import { Particle, particleTypes } from "./Particle";
 import { State } from "./State";
 import { Rule } from "./Interactions";
-import { Orientation } from "./Physics";
 
 export class Simulation {
     dimensions: number;
@@ -41,14 +40,14 @@ export class Simulation {
             "Time elapsed: " + this.t.toString(),
             "Center: " + this.state.getCenter(),
             "Momentum: " + this.state.getMomentum(), 
-            "Particles: " + this.state.particles.map(particle => "{"+particle.position.x.map(x_i => +Math.floor(x_i * 10000) / 10000).join(',')+"}"), 
+            // "Particles: " + this.state.particles.map(particle => "{"+particle.position.x.map(x_i => +Math.floor(x_i * 10000) / 10000).join(',')+"}"), 
         ].join("\n");
     }
 }
 
 export const unitSquareSimulation = new Simulation({
     dimensions: 2,
-    boundary: unitSquare(),
+    boundary: squareBounds(100),
     rule: new Rule({ monopoleTensor: [
         [0.5, -1, 0],
         [-1, 0.5, 1],

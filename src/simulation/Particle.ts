@@ -1,5 +1,4 @@
-import { randomUUID } from "crypto";
-import { Orientation } from "./Physics";
+import { Orientation } from "./utils";
 
 export const particleTypes = ["RED", "GREEN", "BLUE"];
 

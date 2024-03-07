@@ -1,6 +1,5 @@
 import { Particle } from "./Particle";
-import { Orientation } from "./Physics";
-import { getDistance } from "./utils";
+import { Orientation, getDistance } from "./utils";
 
 export class State {
     dimension: number;

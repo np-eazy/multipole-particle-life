@@ -1,3 +1,82 @@
+export class Orientation {
+    dimension: number;
+    x: number[];
+    dxn: number[] | undefined;
+
+    constructor(x: number[] | number, dxn?: number[]) {
+        if (Array.isArray(x)) {
+            this.dimension = x.length;
+            this.x = x;
+            this.dxn = dxn ? normalize(dxn) : undefined;
+        } else {
+            this.dimension = x;
+            this.x = new Array(x).fill(0); 
+            this.dxn = dxn ? normalize(dxn) : undefined;
+        }
+    }
+
+    getNormX(squared?: boolean): number {
+        const normSquared = this.x.reduce((prev, curr) => prev + curr * curr, 0);
+        return squared ? normSquared : Math.sqrt(normSquared);
+    }
+
+    getDistance(other: Orientation, squared?: boolean): number {
+        const distSquared = this.x.reduce((prev, curr, index) => prev + (other.x[index] - curr) ** 2, 0);
+        return squared ? distSquared : Math.sqrt(distSquared);
+    }
+
+    getDotX(other: Orientation): number {
+        return this.x.reduce((sum, component, index) => sum + component * other.x[index], 0);
+    }
+
+    addX(dx: number[] | Orientation): void {
+        if (Array.isArray(dx)) {
+            this.x = this.x.map((x_i, i) => dx[i] - x_i);
+        } else {
+            this.x = this.x.map((x_i, i) => dx.x[i] - x_i); 
+        }
+    }
+
+    subX(dx: number[] | Orientation): void {
+        if (Array.isArray(dx)) {
+            this.x = this.x.map((x_i, i) => dx[i] - x_i);
+        } else {
+            this.x = this.x.map((x_i, i) => dx.x[i] - x_i); 
+        }    
+    }
+
+    scaleX(c: number): void {
+        this.x = this.x.map((x_i) => x_i * c);
+    }
+
+    scaleAddX(c: number, dx: number[] | Orientation): void {
+        if (Array.isArray(dx)) {
+            this.x = this.x.map((x_i, i) => x_i + c * dx[i]);
+        } else {
+            this.x = this.x.map((x_i, i) => x_i + c * dx.x[i]); 
+        }
+    }
+
+    deltaX(dx: Orientation): Orientation {
+        return new Orientation(this.x.map((x_i, i) => dx.x[i] - x_i)); 
+    }
+
+    unitDeltaX(dx: Orientation): Orientation {
+        const delta = this.deltaX(dx);
+        delta.scaleX(1 / delta.getNormX());
+        return delta;
+    }
+
+    normalize(): void {
+        const norm = this.getNormX();
+        this.x = this.x.map((x_i) => x_i / norm);
+    }
+
+    reflect(normal: Orientation): void {
+        this.scaleAddX(-2 * this.getDotX(normal), normal);
+    }
+}
+
 export const normalize = (x: number[]): number[] => {
     const norm = Math.sqrt(x.reduce((prev, curr) => prev + curr * curr, 0));
     return x.map(x_i => x_i / norm);

@@ -1,6 +1,5 @@
 import { Particle, particleTypes } from "./Particle";
-import { Orientation } from "./Physics";
-import { secantApprox } from "./utils";
+import { Orientation, secantApprox } from "./utils";
 
 export const getInteractionId = (type1: string, type2: string): string => {
     return type1 + ":" + type2;
