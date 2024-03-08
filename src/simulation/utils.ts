@@ -55,12 +55,13 @@ export class Orientation {
         return this;
     }
 
-    scaleAddX(c: number, dx: number[] | Orientation): void {
+    scaleAddX(c: number, dx: number[] | Orientation): Orientation {
         if (Array.isArray(dx)) {
             this.x = this.x.map((x_i, i) => x_i + c * dx[i]);
         } else {
             this.x = this.x.map((x_i, i) => x_i + c * dx.x[i]); 
         }
+        return this;
     }
 
     deltaX(dx: Orientation): Orientation {

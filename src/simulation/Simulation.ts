@@ -3,7 +3,7 @@ import { Boundary, squareBounds } from "./Boundary";
 import { Particle, particleTypes } from "./Particle";
 import { State } from "./State";
 import { Rule } from "./Interactions";
-import { interactionBound } from "./Physics";
+import { elasticCollision, interactionBound } from "./Physics";
 
 export class Simulation {
     dimensions: number;
@@ -72,11 +72,10 @@ export class Simulation {
 
     correctOverlaps() {
         [...this.state.particlePairs(20)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
-            if (distance < p1.radius + p2.radius) {
-                p1.position.scaleAddX(p1.radius + p2.radius - distance, p2.position.deltaX(p1.position).normalize());
-                const temp = p2.velocity.copy();
-                p2.velocity.scaleX(2 * p1.mass / (p1.mass + p2.mass)).scaleAddX((p2.mass - p1.mass) / (p1.mass + p2.mass), temp);
-                p1.velocity.scaleX((p1.mass - p2.mass) / (p1.mass + p2.mass)).scaleAddX(2 * p2.mass / (p1.mass + p2.mass), temp);
+            const [r1, r2] = [p1.physics.radius, p2.physics.radius, p1.physics.radius, p2.physics.radius];
+            if (distance < r1 + r2) {
+                p1.position.scaleAddX(r1 +r2 - distance, p2.position.deltaX(p1.position).normalize());
+                elasticCollision(p1, p2, 0.9);
             }
         });
     }

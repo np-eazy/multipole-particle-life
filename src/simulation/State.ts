@@ -20,10 +20,7 @@ export class State {
         this.particles.forEach((particle: Particle) => {
             const p = new Particle({
                 id: particle.id,
-                particleType: particle.particleType,
-                mass: particle.mass,
-                radius: particle.radius,
-                momentCoefficient: particle.momentCoefficient,
+                properties: particle.properties,
                 position: particle.position.copy(),
                 velocity: particle.velocity.copy(),
                 forceTorque: particle.forceTorque.copy(),
@@ -37,7 +34,7 @@ export class State {
         this.t += h;
         other.particles.forEach((particle: Particle) => {
             this.particleMap.get(particle.id)!.position.scaleAddX(h, other.particleMap.get(particle.id)!.velocity);
-            this.particleMap.get(particle.id)!.velocity.scaleAddX(h / particle.mass, other.particleMap.get(particle.id)!.forceTorque);
+            this.particleMap.get(particle.id)!.velocity.scaleAddX(h / particle.physics.mass, other.particleMap.get(particle.id)!.forceTorque);
         })
         return this;
     }
@@ -69,7 +66,7 @@ export class State {
     getMomentum() {
         const total = new Orientation(this.dimension);
         for (const particle of this.particles) {
-            total.scaleAddX(particle.mass, particle.velocity);
+            total.scaleAddX(particle.physics.mass, particle.velocity);
         }
         return total.x;
     }
@@ -77,7 +74,7 @@ export class State {
     getCenter() {
         const total = new Orientation(this.dimension);
         for (const particle of this.particles) {
-            total.scaleAddX(particle.mass, particle.velocity);
+            total.scaleAddX(particle.physics.mass, particle.velocity);
         }
         total.scaleX(1 / this.particles.length);
         return total.x;

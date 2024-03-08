@@ -38,7 +38,7 @@ export class Rule {
     }
 
     getForce(p1: Particle, p2: Particle, distance: number): Orientation {
-        const interaction: Interaction = this.interactionMap.get(getInteractionId(p1.particleType, p2.particleType));
+        const interaction: Interaction = this.interactionMap.get(getInteractionId(p1.properties.name, p2.properties.name));
 
         if (interaction) {
             const potential = interaction.potential;

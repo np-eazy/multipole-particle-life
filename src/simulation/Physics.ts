@@ -6,24 +6,29 @@ export class Physics {
     }
 }
 
-
-
+export const Moments = {
+    UNIFORM_SPHERE: 0.4,
+}
 
 export const baseInteractionPotential = (radius: number, affinity: number) => {
-    const baseCoefficient = 15;
-    const baseRepulsion = 1.5;
-    const effectiveRadius = 4;
+    const baseCoefficient = 5;
+    const baseRepulsion = 10;
+    const baseRadius = 3;
+    const affineOffset = 0.5;
     return (r: number) => {
-        return (baseRepulsion * r - baseCoefficient * ((affinity + 1) * r) / (effectiveRadius * radius)) * Math.exp(-r / (effectiveRadius * radius));
+        const effectiveRadius = r / (baseRadius * radius);
+        return baseCoefficient * (baseRepulsion -  ((affinity * Math.abs(affinity) + affineOffset) * effectiveRadius)) * Math.exp(-effectiveRadius);
     }
 }
 
-export const decayRate = 1;
+export const decayRate = 0.5;
 
 export const interactionBound = 500;
 
-export const elasticCollision = (p1: Particle, p2: Particle) => {
+export const elasticCollision = (p1: Particle, p2: Particle, restitution: number = 1) => {
     const temp = p2.velocity.copy();
-    p2.velocity.scaleX(2 * p1.mass / (p1.mass + p2.mass)).scaleAddX((p2.mass - p1.mass) / (p1.mass + p2.mass), temp);
-    p1.velocity.scaleX((p1.mass - p2.mass) / (p1.mass + p2.mass)).scaleAddX(2 * p2.mass / (p1.mass + p2.mass), temp);
+    const m1 = p1.physics.mass;
+    const m2 = p2.physics.mass;
+    p2.velocity.scaleX(2 * m1 / (m1 + m2)).scaleAddX((m2 - m1) / (m1 + m2), p1.velocity.copy()).scaleX(restitution);
+    p1.velocity.scaleX((m1 - m2) / (m1 + m2)).scaleAddX(2 * m2 / (m1 + m2), temp).scaleX(restitution);
 }
