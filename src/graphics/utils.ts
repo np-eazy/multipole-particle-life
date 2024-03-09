@@ -91,8 +91,8 @@ export const cameraTransformation = (globalPosition: number[], cameraTf: cameraT
 }
 
 export const affineTransformation = (globalPosition: number[], affineTf: affineTf): number[] => {
-    const translatedX = globalPosition[0] - affineTf.cx;
-    const translatedY = globalPosition[1] - affineTf.cy;
+    const translatedX = globalPosition[0];
+    const translatedY = globalPosition[1];
 
     const rotatedX = affineTf.r ? translatedX * Math.cos(affineTf.r) - translatedY * Math.sin(affineTf.r) : translatedX;
     const rotatedY = affineTf.r ? translatedX * Math.sin(affineTf.r) + translatedY * Math.cos(affineTf.r) : translatedY;

@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Simulation } from "../simulation/Simulation";
 import { Particle } from "../simulation/Particle";
 import { sim, stepSize } from "../config/SimulationConfig";
-import { totalHeight, totalWidth, zoom } from "../config/GraphicsConfig";
+import { windowHeight, windowWidth, windowZoom } from "../config/GraphicsConfig";
 import { Color, affineTf, getRenderCoord } from "./utils";
 
 export const centerTf: affineTf = {
-    cx: totalWidth / 2,
-    cy: totalHeight / 2,
-    z: zoom
+    cx: windowWidth / 2,
+    cy: windowHeight / 2,
+    z: windowZoom,
 }
 
 export function drawParticle(ctx: any, particle: Particle) {
@@ -20,7 +20,7 @@ export function drawCircle(ctx: any, x: number, y: number, radius: number, color
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI); 
     ctx.fillStyle = color.toHex();
-    console.log(ctx.fill()); 
+    ctx.fill();
 }
 
 export const Display = (props: any) => {
@@ -62,6 +62,6 @@ export const Display = (props: any) => {
     return (<div style={{
         margin: 10,
     }}>
-        <canvas ref={canvasRef} width={totalWidth} height={totalHeight}></canvas>
+        <canvas ref={canvasRef} width={windowWidth} height={windowHeight}></canvas>
     </div>);
 }
