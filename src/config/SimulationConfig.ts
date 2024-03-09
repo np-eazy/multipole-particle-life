@@ -16,7 +16,7 @@ const particleProperties = homogenousProperties(diversity, 1, { mass: 1, radius:
 export const sim = new Simulation({
     dimensions: 2,
     stepSize: 0.01,
-    boundary: circularClosedBounds(100),
+    boundary: circularClosedBounds(globalRadius),
     particleProperties: particleProperties,
     rule: new Rule({ particleProperties: particleProperties, monopoleTensor: snake(diversity, 0, 1, 0.1, -0.1) }),
     particles: getGaussianDistribution(particleProperties, origin, 25, 25),

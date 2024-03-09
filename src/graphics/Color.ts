@@ -31,7 +31,6 @@ export class Color {
         return this;
     }
 
-
     toHex() {
         if (this.hex) {
             return this.hex;
@@ -43,8 +42,6 @@ export class Color {
         return `#${conv(this.r)}${conv(this.g)}${conv(this.b)}`;
     }
 }
-
-
 
 export function hueToRgb(hue: number): Color {
     hue = hue % 360; // Ensure hue is within 0-360

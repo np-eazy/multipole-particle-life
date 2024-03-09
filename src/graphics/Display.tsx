@@ -2,27 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Simulation } from "../simulation/Simulation";
 import { Particle } from "../simulation/Particle";
 import { sim } from "../config/SimulationConfig";
-import { windowHeight, windowWidth, windowZoom } from "../config/GraphicsConfig";
-import { Color } from "./utils";
-import { affineTf, getRenderCoord } from "./Transformations";
-
-export const centerTf: affineTf = {
-    cx: windowWidth / 2,
-    cy: windowHeight / 2,
-    z: windowZoom,
-}
-
-export function drawParticle(ctx: any, particle: Particle) {
-    const [x, y] = getRenderCoord(particle.position.x, centerTf, undefined);
-    drawCircle(ctx, x, y, particle.graphics.size * centerTf.z, particle.graphics.color);
-}
-
-export function drawCircle(ctx: any, x: number, y: number, radius: number, color: Color) {
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, 2 * Math.PI); 
-    ctx.fillStyle = color.toHex();
-    ctx.fill();
-}
+import { centerTf, windowHeight, windowWidth } from "../config/GraphicsConfig";
 
 export const Display = (props: any) => {
     const [simulation, setSimulation] = useState<Simulation | null>(null);
@@ -43,7 +23,7 @@ export const Display = (props: any) => {
             }, 1000 * simulation.h); 
         }
         return () => {
-          if (intervalId) clearInterval(intervalId);
+            if (intervalId) clearInterval(intervalId);
         };
     }, [simulation]); 
 
@@ -51,18 +31,21 @@ export const Display = (props: any) => {
     const renderSimulation = (particles: Particle[], wasmModule: any, canvas: HTMLCanvasElement | null) => {    
         if (canvas) {
             const ctx = canvas.getContext('2d');
-            if (ctx) {
+            if (ctx && particles) {
+                const affineTf = centerTf;
+                const cameraTf = particles[0].dimension == 3 ? { } : undefined;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 particles.forEach(particle => {
-                    drawParticle(ctx, particle);
+                    particle.graphics.renderCallback(ctx, particle, {
+                        affineTf: affineTf,
+                        cameraTf: cameraTf,
+                    });
                 });
             }
         }
     };
 
-    return (<div style={{
-        margin: 10,
-    }}>
+    return (<div>
         <canvas ref={canvasRef} width={windowWidth} height={windowHeight}></canvas>
     </div>);
 }
