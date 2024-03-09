@@ -1,28 +1,26 @@
 import { circularClosedBounds } from "../simulation/Boundary";
 import { Rule } from "../simulation/Interactions";
 import { Particle } from "../simulation/Particle";
+import { ParticleProperties } from "../simulation/ParticleProperties";
+import { Moments } from "../simulation/Physics";
 import { Simulation } from "../simulation/Simulation";
 import { Orientation, sample2DGaussian } from "../simulation/utils";
-import { particlePropertiesConfig } from "./ParticlePropertiesConfig";
+import { snake } from "./InteractionsConfig";
+import { homogenousProperties } from "./ParticlePropertiesConfig";
 
+const diversity = 8;
 const density = 25;
-const interactionRule = [
-    [4, 0, 0, 0, 0],
-    [0.5, 4,  -0.5, 0, 0],
-    [-0.5, 0.5, 2, -5, 0],
-    [-0.5, 0.5, 0, 2, 5],
-    [-0.5, 0.5, 5, 0, 2],
-];
-const snek = [
-    [5, 5, 0, 0, 0],
-    [5, 5, 3, 0, 0],
-    [-2, 5, 5, 3, 0],
-    [-1, 5, -2, 5, 3],
-    [1, 5, -1, -2, 5],
-];
-export const simulationRadius = 100;
+
+export const globalRadius = 100;
 export const stepSize = 0.01;
 const particles = [];
+
+const particlePropertiesConfig = homogenousProperties(8, 1, { mass: 1, radius: 1, momentCoefficient: Moments.UNIFORM_SPHERE });
+const particlePropertiesMap = new Map();
+
+particlePropertiesConfig.forEach((props: ParticleProperties) => {
+    particlePropertiesMap.set(props.name, props);
+})
 
 for (let i = 0; i < particlePropertiesConfig.length; i++) {
     for (let j = 0; j < density; j++) {
@@ -34,8 +32,9 @@ for (let i = 0; i < particlePropertiesConfig.length; i++) {
 }
 export const sim = new Simulation({
     dimensions: 2,
-    stepSize: 0.004,
-    boundary: circularClosedBounds(simulationRadius),
-    rule: new Rule({ monopoleTensor: snek }),
+    stepSize: stepSize,
+    boundary: circularClosedBounds(globalRadius),
+    rule: new Rule({ monopoleTensor: snake(diversity, 0, 1, 0.1, -0.1) }),
     particles: particles,
 });
+

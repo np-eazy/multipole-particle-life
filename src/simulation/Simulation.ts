@@ -1,6 +1,5 @@
-import { Orientation, sample2DGaussian } from "./utils";
-import { Boundary, squareBounds } from "./Boundary";
-import { Particle, particleTypes } from "./Particle";
+import { Boundary } from "./Boundary";
+import { Particle } from "./Particle";
 import { State } from "./State";
 import { Rule } from "./Interactions";
 import { elasticCollision, interactionBound } from "./Physics";

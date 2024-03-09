@@ -109,3 +109,33 @@ export const getRenderCoord = (globalPosition: number[], affineTf?: affineTf, ca
     return affine;
 }
 
+export function hueToRgb(hue: number): Color {
+    hue = hue % 360; // Ensure hue is within 0-360
+    const c = 1; // Saturation and value are maxed out at 1 for full color
+    const x = 1 - Math.abs((hue / 60) % 2 - 1);
+    const m = 0; // RGB color model does not use a brightness component
+
+    let r = 0, g = 0, b = 0;
+
+    if (hue < 60) {
+        r = c; g = x; b = 0;
+    } else if (hue < 120) {
+        r = x; g = c; b = 0;
+    } else if (hue < 180) {
+        r = 0; g = c; b = x;
+    } else if (hue < 240) {
+        r = 0; g = x; b = c;
+    } else if (hue < 300) {
+        r = x; g = 0; b = c;
+    } else {
+        r = c; g = 0; b = x;
+    }
+
+    // Convert to 0-255 range
+    r = Math.floor((r + m) * 255);
+    g = Math.floor((g + m) * 255);
+    b = Math.floor((b + m) * 255);
+
+    return new Color(r, g, b);
+}
+

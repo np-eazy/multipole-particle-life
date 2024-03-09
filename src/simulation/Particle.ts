@@ -3,8 +3,6 @@ import { ParticlePhysicsProps, ParticleProperties } from "./ParticleProperties";
 import { decayRate } from "./Physics";
 import { Orientation } from "./utils";
 
-export const particleTypes = ["RED", "GREEN", "BLUE", "MAGENTA", "GOLD"];
-
 export class Particle {
     id: string;
     dimension: number;
