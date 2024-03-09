@@ -6,6 +6,8 @@ export type ParticlePhysicsProps = {
     momentCoefficient: number;
 }
 
+export const particlePropertiesMap = new Map();
+
 export class ParticleProperties {
     index: number;
     name: string;
@@ -18,5 +20,6 @@ export class ParticleProperties {
         this.physics = physics;
         this.graphics = graphics;
         this.graphics.parent = this;
+        particlePropertiesMap.set(this.name, this);
     }
 }

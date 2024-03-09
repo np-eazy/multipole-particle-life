@@ -1,4 +1,3 @@
-import { particlePropertiesConfig, particlePropertiesMap } from "../config/ParticlePropertiesConfig";
 import { Particle } from "./Particle";
 import { ParticleProperties } from "./ParticleProperties";
 import { baseInteractionPotential } from "./Physics";
@@ -26,19 +25,20 @@ export class Rule {
     interactions: any[][];
     interactionMap = new Map();
 
-    constructor({monopoleTensor}: {monopoleTensor: number[][]}) {
+    constructor(params: {particleProperties: ParticleProperties[], monopoleTensor: number[][]}) {
         const radius = 1;
-        this.interactions = monopoleTensor.map(row => row.map(cell => 0));
-        for (let i = 0; i < monopoleTensor.length; i++) {
-            for (let j = 0; j < monopoleTensor[i].length; j++) {
-                const prop1 = particlePropertiesConfig[i];
-                const prop2 = particlePropertiesConfig[j];
-                this.interactions[i][j] = new Interaction({prop1: prop1, prop2: prop2, potential: baseInteractionPotential(radius, monopoleTensor[i][j])});
+        this.interactions = params.monopoleTensor.map(row => row.map(cell => 0));
+        for (let i = 0; i < params.monopoleTensor.length; i++) {
+            for (let j = 0; j < params.monopoleTensor[i].length; j++) {
+                const prop1 = params.particleProperties[i];
+                const prop2 = params.particleProperties[j];
+                this.interactions[i][j] = new Interaction({prop1: prop1, prop2: prop2, potential: baseInteractionPotential(radius, params.monopoleTensor[i][j])});
                 this.interactionMap.set(getInteractionId(prop1.name, prop2.name), this.interactions[i][j]);
             }
         }
     }
 
+    // BOTTLENECK //
     getForce(p1: Particle, p2: Particle, distance: number): Orientation {
         const interaction: Interaction = this.interactionMap.get(getInteractionId(p1.properties.name, p2.properties.name));
 

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Simulation } from "../simulation/Simulation";
 import { Particle } from "../simulation/Particle";
-import { sim, stepSize } from "../config/SimulationConfig";
+import { sim } from "../config/SimulationConfig";
 import { windowHeight, windowWidth, windowZoom } from "../config/GraphicsConfig";
-import { Color, affineTf, getRenderCoord } from "./utils";
+import { Color } from "./utils";
+import { affineTf, getRenderCoord } from "./Transformations";
 
 export const centerTf: affineTf = {
     cx: windowWidth / 2,
@@ -37,9 +38,9 @@ export const Display = (props: any) => {
         let intervalId: any;
         if (simulation) {        
             intervalId = setInterval(() => {
-                simulation.rk4Step(stepSize);
+                simulation.rk4Step();
                 renderSimulation(simulation.state.particles, undefined, canvasRef.current);
-            }, 1000 * stepSize); 
+            }, 1000 * simulation.h); 
         }
         return () => {
           if (intervalId) clearInterval(intervalId);

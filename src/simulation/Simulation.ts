@@ -3,23 +3,26 @@ import { Particle } from "./Particle";
 import { State } from "./State";
 import { Rule } from "./Interactions";
 import { elasticCollision, interactionBound } from "./Physics";
+import { ParticleProperties } from "./ParticleProperties";
 
 export class Simulation {
     dimensions: number;
     t: number;
     h: number;
     boundary: Boundary;
+    particleProperties: ParticleProperties[];
     rule: Rule;
     state: State;
 
-    constructor({ dimensions, boundary, rule, particles, stepSize }: { dimensions: number; boundary: Boundary, rule: Rule, particles: Particle[], stepSize: number }) {
-        this.dimensions = dimensions;
+    constructor(params: { dimensions: number; boundary: Boundary, rule: Rule, particleProperties: ParticleProperties[], particles: Particle[], stepSize: number }) {
+        this.dimensions = params.dimensions;
         this.t = 0;
-        this.h = stepSize;
-        this.boundary = boundary;
-        this.rule = rule;
-        this.state = new State(dimensions);
-        particles.forEach((particle: Particle) => {
+        this.h = params.stepSize;
+        this.boundary = params.boundary;
+        this.rule = params.rule;
+        this.particleProperties = params.particleProperties;
+        this.state = new State(params.dimensions);
+        params.particles.forEach((particle: Particle) => {
             this.state.addParticle(particle);
         })
     }
@@ -38,8 +41,8 @@ export class Simulation {
         currState.clearDeletedParticles();
     }
 
-    rk4Step(h: number) {
-        const loadDerivative = (h1: number, state: State) => {
+    rk4Step() {
+        const loadDerivative = (state: State) => {
             [...state.particlePairs(interactionBound)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
                 p1.loadForce(this.rule.getForce(p1, p2, distance));
                 p2.loadForce(this.rule.getForce(p2, p1, distance));
@@ -50,20 +53,20 @@ export class Simulation {
         };
     
         const stateK1 = this.state.copy(); 
-        loadDerivative(h / 6, stateK1);
+        loadDerivative(stateK1);
     
-        const stateK2 = this.state.copy().offsetBy(stateK1, h / 2); 
-        loadDerivative(h / 6, stateK2);
+        const stateK2 = this.state.copy().offsetBy(stateK1, this.h / 2); 
+        loadDerivative(stateK2);
     
-        const stateK3 = this.state.copy().offsetBy(stateK2, h / 2);
-        loadDerivative(h / 6, stateK3);
+        const stateK3 = this.state.copy().offsetBy(stateK2, this.h / 2);
+        loadDerivative(stateK3);
     
-        const stateK4 = this.state.copy().offsetBy(stateK3, h);
-        loadDerivative(h / 6, stateK4);
+        const stateK4 = this.state.copy().offsetBy(stateK3, this.h);
+        loadDerivative(stateK4);
 
-        this.state.offsetBy(stateK1, h / 6).offsetBy(stateK2, h / 3).offsetBy(stateK3, h / 3).offsetBy(stateK4, h / 6);
+        this.state.offsetBy(stateK1, this.h / 6).offsetBy(stateK2, this.h / 3).offsetBy(stateK3, this.h / 3).offsetBy(stateK4, this.h / 6);
         this.state.particles.forEach((particle: Particle) => {
-            particle.move(h);
+            particle.move(this.h);
         });
         this.correctOverlaps();
         this.boundary.checkBounds(this.state.particles);
