@@ -1,10 +1,5 @@
 import { Particle } from "./Particle";
-
-export class Physics {
-    constructor() {
-
-    }
-}
+import { Orientation } from "./Utils";
 
 export const Moments = {
     UNIFORM_SPHERE: 0.4,
@@ -31,4 +26,8 @@ export const elasticCollision = (p1: Particle, p2: Particle, restitution: number
     const m2 = p2.physics.mass;
     p2.velocity.scaleX(2 * m1 / (m1 + m2)).scaleAddX((m2 - m1) / (m1 + m2), p1.velocity.copy()).scaleX(restitution);
     p1.velocity.scaleX((m1 - m2) / (m1 + m2)).scaleAddX(2 * m2 / (m1 + m2), temp).scaleX(restitution);
+}
+
+export const reflect = (v: Orientation, normal: Orientation) => {
+    v.scaleAddX(-2 * v.getDotX(normal) / normal.getNormX(false), normal);
 }

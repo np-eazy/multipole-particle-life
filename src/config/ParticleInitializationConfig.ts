@@ -1,6 +1,6 @@
 import { Particle } from "../simulation/Particle";
 import { ParticleProperties } from "../simulation/ParticleProperties";
-import { Orientation, sample2DGaussian } from "../simulation/utils";
+import { Orientation, sample2DGaussian } from "../simulation/Utils";
 
 export const getGaussianDistribution = (particleProperties: ParticleProperties[], center: Orientation, density: number, sigma: number): Particle[] => {
     const particles: Particle[] = [];

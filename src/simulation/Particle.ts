@@ -1,7 +1,7 @@
 import { ParticleGraphicsProps } from "../graphics/ParticleGraphicsProps";
 import { ParticlePhysicsProps, ParticleProperties } from "./ParticleProperties";
 import { decayRate } from "./Physics";
-import { Orientation } from "./utils";
+import { Orientation } from "./Utils";
 
 export class Particle {
     id: string;

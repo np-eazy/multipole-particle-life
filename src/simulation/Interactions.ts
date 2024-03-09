@@ -1,7 +1,7 @@
 import { Particle } from "./Particle";
 import { ParticleProperties } from "./ParticleProperties";
 import { baseInteractionPotential } from "./Physics";
-import { Orientation, secantApprox } from "./utils";
+import { Orientation, secantApprox } from "./Utils";
 
 export const getInteractionId = (type1: string, type2: string): string => {
     return type1 + ":" + type2;
@@ -21,7 +21,7 @@ export class Interaction {
     }
 }
 
-export class Rule {
+export class InteractionTable {
     interactions: any[][];
     interactionMap = new Map();
 

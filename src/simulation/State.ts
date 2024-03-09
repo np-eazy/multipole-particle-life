@@ -1,5 +1,4 @@
 import { Particle } from "./Particle";
-import { Orientation, getDistance } from "./utils";
 
 export class State {
     dimension: number;
@@ -30,7 +29,7 @@ export class State {
         return state;
     }
 
-    offsetBy(other: State, h: number): State {
+    perturb(other: State, h: number): State {
         this.t += h;
         other.particles.forEach((particle: Particle) => {
             this.particleMap.get(particle.id)!.position.scaleAddX(h, other.particleMap.get(particle.id)!.velocity);
@@ -45,13 +44,13 @@ export class State {
     }
 
     clearDeletedParticles() {
-        for (const particle of this.particles.filter(particle => particle.markForDeletion)) {
+        for (const particle of this.particles.filter(particle => particle.deleted)) {
             this.particleMap.set(particle.id, undefined);
         }
         this.particles = this.particles.filter((particle: Particle) => !particle.deleted);
     }
 
-    *particlePairs(interactionThreshold: number) {
+    *getPairs(interactionThreshold: number) {
         for (let i = 0; i < this.particles.length - 1; i++) {
             for (let j = i + 1; j < this.particles.length; j++) {
                 const distance = this.particles[i].position.getDistance(this.particles[j].position);
@@ -60,23 +59,5 @@ export class State {
                 }
             }
         }
-    }
-
-    // Analytics
-    getMomentum() {
-        const total = new Orientation(this.dimension);
-        for (const particle of this.particles) {
-            total.scaleAddX(particle.physics.mass, particle.velocity);
-        }
-        return total.x;
-    }
-
-    getCenter() {
-        const total = new Orientation(this.dimension);
-        for (const particle of this.particles) {
-            total.scaleAddX(particle.physics.mass, particle.velocity);
-        }
-        total.scaleX(1 / this.particles.length);
-        return total.x;
     }
 }

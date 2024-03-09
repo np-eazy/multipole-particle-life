@@ -79,10 +79,6 @@ export class Orientation {
         this.x = this.x.map((x_i) => x_i / norm);
         return this;
     }
-
-    reflect(normal: Orientation): void {
-        this.scaleAddX(-2 * this.getDotX(normal) / normal.getNormX(false), normal);
-    }
 }
 
 export const normalize = (x: number[]): number[] => {

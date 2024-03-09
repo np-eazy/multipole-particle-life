@@ -1,8 +1,8 @@
-import { circularClosedBounds } from "../simulation/Boundary";
-import { Rule } from "../simulation/Interactions";
+import { closedCircularBounds } from "../simulation/Boundary";
+import { InteractionTable } from "../simulation/Interactions";
 import { Moments } from "../simulation/Physics";
 import { Simulation } from "../simulation/Simulation";
-import { Orientation } from "../simulation/utils";
+import { Orientation } from "../simulation/Utils";
 import { snake } from "./InteractionsConfig";
 import { getGaussianDistribution } from "./ParticleInitializationConfig";
 import { homogenousProperties } from "./ParticlePropertiesConfig";
@@ -16,8 +16,8 @@ const particleProperties = homogenousProperties(diversity, 1, { mass: 1, radius:
 export const sim = new Simulation({
     dimensions: 2,
     stepSize: 0.01,
-    boundary: circularClosedBounds(globalRadius),
+    boundary: closedCircularBounds(globalRadius),
     particleProperties: particleProperties,
-    rule: new Rule({ particleProperties: particleProperties, monopoleTensor: snake(diversity, 0, 1, 0.1, -0.1) }),
+    rule: new InteractionTable({ particleProperties: particleProperties, monopoleTensor: snake(diversity, 0, 1, 0.1, -0.1) }),
     particles: getGaussianDistribution(particleProperties, origin, 25, 25),
 });
