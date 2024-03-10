@@ -6,9 +6,9 @@ export const Moments = {
 }
 
 const baseCoefficient = 5;
-const baseRepulsion = 10;
-const baseRadius = 3;
-const affineOffset = 0.5;
+const baseRepulsion = 3;
+const baseRadius = 2;
+const affineOffset = 0;
 
 export const baseInteractionPotential = (radius: number, affinity: number): Function => {
     return (r: number): number => {
@@ -26,10 +26,6 @@ export const baseInteractionPotentialDerivative = (radius: number, affinity: num
     }
 }
 
-
-export const decayRate = 0.5;
-
-export const interactionBound = 500;
 
 export const elasticCollision = (p1: Particle, p2: Particle, restitution: number = 1) => {
     const temp = p2.velocity.copy();

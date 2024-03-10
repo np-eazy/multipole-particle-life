@@ -2,8 +2,9 @@ import { Boundary } from "./Boundary";
 import { Particle } from "./Particle";
 import { State } from "./State";
 import { InteractionTable } from "./Interactions";
-import { elasticCollision, interactionBound } from "./Physics";
+import { elasticCollision } from "./Physics";
 import { ParticleProperties } from "./ParticleProperties";
+import { globalDrag, interactionBound } from "../config/SimulationConfig";
 
 export class Simulation {
     dimensions: number;
@@ -75,7 +76,7 @@ export class Simulation {
             const [r1, r2] = [p1.physics.radius, p2.physics.radius, p1.physics.radius, p2.physics.radius];
             if (distance < r1 + r2) {
                 p1.position.addScaledV(r1 +r2 - distance, p2.position.getDelta(p1.position).normalize());
-                elasticCollision(p1, p2, 0.9);
+                elasticCollision(p1, p2, globalDrag);
             }
         });
     }
