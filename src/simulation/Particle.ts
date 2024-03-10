@@ -1,7 +1,7 @@
 import { ParticleGraphicsProps } from "../graphics/ParticleGraphicsProps";
 import { ParticlePhysicsProps, ParticleProperties } from "./ParticleProperties";
 import { decayRate } from "./Physics";
-import { Orientation } from "./Utils";
+import { Vector } from "./Utils";
 
 export class Particle {
     id: string;
@@ -9,17 +9,17 @@ export class Particle {
     properties: ParticleProperties;
     physics: ParticlePhysicsProps;
     graphics: ParticleGraphicsProps;
-    position: Orientation;
-    velocity: Orientation;
-    forceTorque: Orientation;
+    position: Vector;
+    velocity: Vector;
+    forceTorque: Vector;
     deleted: boolean;
 
     constructor(params: {
         id?: string, 
         properties: ParticleProperties, 
-        position: Orientation, 
-        velocity?: Orientation, 
-        forceTorque?: Orientation
+        position: Vector, 
+        velocity?: Vector, 
+        forceTorque?: Vector
     }) {
         this.id = params.id ?? (Date.now() + Math.random() * 100000).toString();
         this.dimension = params.position.x.length;
@@ -30,24 +30,24 @@ export class Particle {
         this.physics = params.properties.physics;
 
         this.position = params.position;
-        this.velocity = params.velocity ?? new Orientation(this.dimension);
-        this.forceTorque = params.forceTorque ?? new Orientation(this.dimension);
+        this.velocity = params.velocity ?? new Vector(this.dimension);
+        this.forceTorque = params.forceTorque ?? new Vector(this.dimension);
         this.deleted = false;
     }
 
-    loadForce(force: Orientation) {
-        this.forceTorque.addX(force);
+    loadForce(force: Vector) {
+        this.forceTorque.addV(force);
         // TODO: handle torque
     }
 
     move(h: number) {
-        this.forceTorque.scaleX(h / this.physics.mass);
+        this.forceTorque.scaleV(h / this.physics.mass);
         // TODO: handle torque
-        this.velocity.addX(this.forceTorque);
-        this.position.addX(this.velocity);
-        this.velocity.scaleX(1 - h * (1 - decayRate));
+        this.velocity.addV(this.forceTorque);
+        this.position.addV(this.velocity);
+        this.velocity.scaleV(1 - h * (1 - decayRate));
 
-        this.forceTorque = new Orientation(this.dimension);
+        this.forceTorque = new Vector(this.dimension);
     }
 
     markForDeletion() {

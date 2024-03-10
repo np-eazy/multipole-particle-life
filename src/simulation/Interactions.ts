@@ -1,24 +1,18 @@
 import { Particle } from "./Particle";
 import { ParticleProperties } from "./ParticleProperties";
-import { baseInteractionPotential } from "./Physics";
-import { Orientation, secantApprox } from "./Utils";
+import { baseInteractionPotential, baseInteractionPotentialDerivative } from "./Physics";
+import { Vector } from "./Utils";
 
-export const getInteractionId = (type1: string, type2: string): string => {
-    return type1 + ":" + type2;
+export const getInteractionId = (prop1: ParticleProperties, prop2: ParticleProperties): string => {
+    return prop1.name + ":" + prop2.name;
 }
 
-export class Interaction {
+export type Interaction = {
     potential: Function;
-    type1: ParticleProperties;
-    type2: ParticleProperties;
+    derivative: Function;
+    propA: ParticleProperties;
+    propB: ParticleProperties;
     interactionId: string;
-
-    constructor({ prop1: type1, prop2: type2, potential: potential }: { prop1: ParticleProperties, prop2: ParticleProperties, potential: Function }) {
-        this.type1 = type1;
-        this.type2 = type2;
-        this.potential = potential;
-        this.interactionId = type1 + ":" + type2;
-    }
 }
 
 export class InteractionTable {
@@ -32,24 +26,22 @@ export class InteractionTable {
             for (let j = 0; j < params.monopoleTensor[i].length; j++) {
                 const prop1 = params.particleProperties[i];
                 const prop2 = params.particleProperties[j];
-                this.interactions[i][j] = new Interaction({prop1: prop1, prop2: prop2, potential: baseInteractionPotential(radius, params.monopoleTensor[i][j])});
-                this.interactionMap.set(getInteractionId(prop1.name, prop2.name), this.interactions[i][j]);
+                this.interactions[i][j] = {
+                    prop1: prop1, 
+                    prop2: prop2, 
+                    potential: baseInteractionPotential(radius, params.monopoleTensor[i][j]),
+                    derivative: baseInteractionPotentialDerivative(radius, params.monopoleTensor[i][j]),
+                    interactionId: getInteractionId(prop1, prop2),
+                };
+                this.interactionMap.set(this.interactions[i][j].interactionId, this.interactions[i][j]);
             }
         }
     }
 
     // BOTTLENECK //
-    getForce(p1: Particle, p2: Particle, distance: number): Orientation {
-        const interaction: Interaction = this.interactionMap.get(getInteractionId(p1.properties.name, p2.properties.name));
-
-        if (interaction) {
-            const potential = interaction.potential;
-            const forceMagnitude = secantApprox(potential, distance, true);
-            const force = p1.position.unitDeltaX(p2.position);
-            force.scaleX(forceMagnitude);
-            return force;
-        } else {
-            return new Orientation((new Array(p1.dimension)).fill(0));
-        }
+    getForce(p1: Particle, p2: Particle, distance: number): Vector {
+        return p1.position
+            .getDelta(p2.position)
+            .scaleV(this.interactionMap.get(getInteractionId(p1.properties, p2.properties)).derivative(distance) / distance);
     }
 }

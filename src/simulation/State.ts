@@ -32,8 +32,8 @@ export class State {
     perturb(other: State, h: number): State {
         this.t += h;
         other.particles.forEach((particle: Particle) => {
-            this.particleMap.get(particle.id)!.position.scaleAddX(h, other.particleMap.get(particle.id)!.velocity);
-            this.particleMap.get(particle.id)!.velocity.scaleAddX(h / particle.physics.mass, other.particleMap.get(particle.id)!.forceTorque);
+            this.particleMap.get(particle.id)!.position.addScaledV(h, other.particleMap.get(particle.id)!.velocity);
+            this.particleMap.get(particle.id)!.velocity.addScaledV(h / particle.physics.mass, other.particleMap.get(particle.id)!.forceTorque);
         })
         return this;
     }

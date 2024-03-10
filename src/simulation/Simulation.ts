@@ -74,7 +74,7 @@ export class Simulation {
         [...this.state.getPairs(20)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
             const [r1, r2] = [p1.physics.radius, p2.physics.radius, p1.physics.radius, p2.physics.radius];
             if (distance < r1 + r2) {
-                p1.position.scaleAddX(r1 +r2 - distance, p2.position.deltaX(p1.position).normalize());
+                p1.position.addScaledV(r1 +r2 - distance, p2.position.getDelta(p1.position).normalize());
                 elasticCollision(p1, p2, 0.9);
             }
         });

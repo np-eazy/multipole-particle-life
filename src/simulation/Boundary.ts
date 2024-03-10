@@ -19,6 +19,22 @@ export class Boundary {
     }
 }
 
+export const closedCircularBounds = (size: number) => new Boundary({
+    equation: (particle: Particle) => {
+        const radius = size;
+        const inBounds = particle.position.getNorm(true) <= size * size;
+        return inBounds;
+    },
+    distanceMetric: (p1: Particle, p2: Particle) => {
+        return p1.position.getDistance(p2.position);
+    },
+    outOfBoundsCallback: (particle: Particle) => {
+        particle.position.normalize();
+        reflect(particle.velocity, particle.position);
+        particle.velocity.scaleV(0.75);
+        particle.position.normalize().scaleV(size);
+    }
+});
 
 export const openSquareBounds = (size: number) => new Boundary({
     equation: (particle: Particle) => {
@@ -35,27 +51,10 @@ export const openSquareBounds = (size: number) => new Boundary({
     }
 });
 
-export const closedCircularBounds = (size: number) => new Boundary({
-    equation: (particle: Particle) => {
-        const radius = size;
-        const inBounds = particle.position.getNormX(true) <= size * size;
-        return inBounds;
-    },
-    distanceMetric: (p1: Particle, p2: Particle) => {
-        return p1.position.getDistance(p2.position);
-    },
-    outOfBoundsCallback: (particle: Particle) => {
-        particle.position.normalize();
-        reflect(particle.velocity, particle.position);
-        particle.velocity.scaleX(0.75);
-        particle.position.scaleX(size * 0.999);
-    }
-});
-
 export const openCircularBounds = (size: number) => new Boundary({
     equation: (particle: Particle) => {
         const radius = size;
-        const inBounds = particle.position.getNormX(true) <= size * size;
+        const inBounds = particle.position.getNorm(true) <= size * size;
         return inBounds;
     },
     distanceMetric: (p1: Particle, p2: Particle) => {
