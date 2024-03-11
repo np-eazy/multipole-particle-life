@@ -9,7 +9,7 @@ export type ParticlePhysicsProps = {
 export const particlePropertiesMap = new Map();
 
 export class ParticleProperties {
-    index: number;
+    readonly index: number;
     name: string;
     physics: ParticlePhysicsProps;
     graphics: ParticleGraphicsProps;

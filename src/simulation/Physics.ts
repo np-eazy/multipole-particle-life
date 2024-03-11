@@ -5,6 +5,7 @@ export const Moments = {
     UNIFORM_SPHERE: 0.4,
 }
 
+// Tuning Parameters
 const baseCoefficient = 5;
 const baseRepulsion = 3;
 const baseRadius = 2;
@@ -37,5 +38,4 @@ export const elasticCollision = (p1: Particle, p2: Particle, restitution: number
 
 export const reflect = (v: Vector, normal: Vector) => {
     v.addScaledV(-2 * v.getDotX(normal) / normal.getNorm(false), normal);
-    console.log(v.x);
 }

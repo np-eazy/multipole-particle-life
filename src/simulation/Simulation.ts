@@ -4,10 +4,25 @@ import { State } from "./State";
 import { InteractionTable } from "./Interactions";
 import { elasticCollision } from "./Physics";
 import { ParticleProperties } from "./ParticleProperties";
-import { globalDrag, interactionBound } from "../config/SimulationConfig";
+
+export type SimulationProps = { 
+    dimension: number,
+    boundary: Boundary, 
+    rule: InteractionTable, 
+    particleProperties: ParticleProperties[], 
+    particles: Particle[], 
+    stepSize: number,
+
+    interactionBound: number,
+    collisionBound: number,
+}
+
+export type SimulationPhysicsProps = {
+    drag: number,
+}
 
 export class Simulation {
-    dimensions: number;
+    dimension: number;
     t: number;
     h: number;
     boundary: Boundary;
@@ -15,23 +30,28 @@ export class Simulation {
     rule: InteractionTable;
     state: State;
 
-    constructor(params: { dimensions: number; boundary: Boundary, rule: InteractionTable, particleProperties: ParticleProperties[], particles: Particle[], stepSize: number }) {
-        this.dimensions = params.dimensions;
+    interactionBound: number;
+    collisionBound: number;
+
+    constructor(params: SimulationProps) {
+        this.dimension = params.dimension;
         this.t = 0;
         this.h = params.stepSize;
         this.boundary = params.boundary;
         this.rule = params.rule;
         this.particleProperties = params.particleProperties;
-        this.state = new State(params.dimensions);
+        this.state = new State(params.dimension);
         params.particles.forEach((particle: Particle) => {
             this.state.addParticle(particle);
         })
+        this.interactionBound = params.interactionBound;
+        this.collisionBound = params.collisionBound;
     }
 
     eulerStep(h: number, state?: State) {
         const currState: State = state ?? this.state;
         if (!state)this.t += h;
-        [...this.state.getPairs(interactionBound)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
+        [...this.state.getPairs(this.interactionBound)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
             p1.loadForce(this.rule.getForce(p1, p2, distance));
             p2.loadForce(this.rule.getForce(p2, p1, distance));
         });
@@ -44,7 +64,7 @@ export class Simulation {
 
     rk4Step() {
         const loadDerivative = (state: State) => {
-            [...state.getPairs(interactionBound)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
+            [...state.getPairs(this.interactionBound)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
                 p1.loadForce(this.rule.getForce(p1, p2, distance));
                 p2.loadForce(this.rule.getForce(p2, p1, distance));
             });
@@ -72,11 +92,11 @@ export class Simulation {
     }
 
     correctOverlaps() {
-        [...this.state.getPairs(20)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
+        [...this.state.getPairs(this.collisionBound)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
             const [r1, r2] = [p1.physics.radius, p2.physics.radius, p1.physics.radius, p2.physics.radius];
             if (distance < r1 + r2) {
                 p1.position.addScaledV(r1 +r2 - distance, p2.position.getDelta(p1.position).normalize());
-                elasticCollision(p1, p2, globalDrag);
+                elasticCollision(p1, p2, 0.5);
             }
         });
     }

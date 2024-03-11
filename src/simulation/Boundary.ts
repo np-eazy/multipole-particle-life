@@ -1,14 +1,22 @@
 import { Particle } from "./Particle";
 import { reflect } from "./Physics";
+import { Vector } from "./Utils";
 
 export class Boundary {
+    globalBounds: Vector;
     equation: Function;
     distanceMetric: Function;
     outOfBoundsCallback: Function;
-    constructor({equation, distanceMetric, outOfBoundsCallback}: {equation: Function, distanceMetric: Function, outOfBoundsCallback: Function}) {
-        this.equation = equation;
-        this.distanceMetric = distanceMetric;
-        this.outOfBoundsCallback = outOfBoundsCallback;
+    constructor(params: {
+        globalBounds: Vector,
+        equation: Function, 
+        distanceMetric: Function, 
+        outOfBoundsCallback: Function,
+    }) {
+        this.equation = params.equation;
+        this.globalBounds = params.globalBounds;
+        this.distanceMetric = params.distanceMetric;
+        this.outOfBoundsCallback = params.outOfBoundsCallback;
     }
     checkBounds(particles: Particle[]) {
         particles.forEach((particle: Particle) => {
@@ -22,9 +30,10 @@ export class Boundary {
 export const closedCircularBounds = (size: number) => new Boundary({
     equation: (particle: Particle) => {
         const radius = size;
-        const inBounds = particle.position.getNorm(true) <= size * size;
+        const inBounds = particle.position.getNorm(true) <= radius * radius;
         return inBounds;
     },
+    globalBounds: new Vector([size * 2, size * 2]),
     distanceMetric: (p1: Particle, p2: Particle) => {
         return p1.position.getDistance(p2.position);
     },
@@ -43,6 +52,7 @@ export const openSquareBounds = (size: number) => new Boundary({
         const inBounds = Math.abs(particle.position.x[0]) < xSize && Math.abs(particle.position.x[1]) < ySize;
         return inBounds;
     },
+    globalBounds: new Vector([size * 2, size * 2]),
     distanceMetric: (p1: Particle, p2: Particle) => {
         return p1.position.getDistance(p2.position);
     },
@@ -57,6 +67,7 @@ export const openCircularBounds = (size: number) => new Boundary({
         const inBounds = particle.position.getNorm(true) <= size * size;
         return inBounds;
     },
+    globalBounds: new Vector([size * 2, size * 2]),
     distanceMetric: (p1: Particle, p2: Particle) => {
         return p1.position.getDistance(p2.position);
     },

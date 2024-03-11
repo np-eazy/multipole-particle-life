@@ -40,6 +40,14 @@ export class InteractionTable {
 
     // BOTTLENECK //
     getForce(p1: Particle, p2: Particle, distance: number): Vector {
+        if (Math.random() < 0.000001) {
+            console.log(
+                p1.properties.index, 
+                p2.properties.index, 
+                getInteractionId(p1.properties, p2.properties),
+                this.interactionMap.get(getInteractionId(p1.properties, p2.properties)), 
+            );
+        }
         return p1.position
             .getDelta(p2.position)
             .scaleV(this.interactionMap.get(getInteractionId(p1.properties, p2.properties)).derivative(distance) / distance);

@@ -1,4 +1,3 @@
-import { globalDrag } from "../config/SimulationConfig";
 import { ParticleGraphicsProps } from "../graphics/ParticleGraphicsProps";
 import { ParticlePhysicsProps, ParticleProperties } from "./ParticleProperties";
 import { Vector } from "./Utils";
@@ -45,7 +44,6 @@ export class Particle {
         // TODO: handle torque
         this.velocity.addV(this.forceTorque);
         this.position.addV(this.velocity);
-        this.velocity.scaleV(1 - h * (1 - globalDrag));
 
         this.forceTorque = new Vector(this.dimension);
     }
