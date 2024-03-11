@@ -1,35 +1,29 @@
 import './App.css';
 import { snakeSimulation } from './config/examples/snake';
 import { Display } from './graphics/Display';
-import { rnaSimulation } from './config/examples/rna';
-import { Moments } from './simulation/Physics';
-import { SimulationDimensions } from './config/ParticleInit';
 
 
 
 
 function App() {
-
-  const standard: SimulationDimensions = {
-    globalSize: 50,
-    dimension: 2,
-    interactionCutoff: 50,
-    h: 0.01,
-  };
-
   return (
     <div className="App">
-      {/* <Display simulation={snakeSimulation(
-        standard,
+      <Display simulation={snakeSimulation(
+        {
+          globalSize: 50,
+          dimension: 3,
+          interactionCutoff: 50,
+          h: 0.01,
+        },
         {  
           interactionCutoff: 20,
           diversity: 5,
           particleSize: 1,
-          particleInitSigma: standard.globalSize / 4,
+          particleInitSigma: 50 / 4,
           particlesPerType: 16,
         }
-      )} turbo={true} width={1200} height={800}/> */}
-      <Display simulation={rnaSimulation(
+      )} turbo={false} width={1200} height={800}/>
+      {/* <Display simulation={rnaSimulation(
         {
           globalSize: 25,
           dimension: 2,
@@ -40,8 +34,8 @@ function App() {
           interactionCutoff: 50,
           collisionCutoff: 4,
 
-          pairCt: Math.round(2 * 250 / 16),
-          chainBinderCt: Math.round(2 * 1000 / 16),
+          pairCt: Math.round(2 * 25 / 16),
+          chainBinderCt: Math.round(2 * 100 / 16),
           pairBinderCt: 50,
           shellCt: 0,
 
@@ -59,7 +53,7 @@ function App() {
           
           initialSpread: 25,
         }
-      )} turbo={true} width={600} height={600}/>
+      )} turbo={true} width={600} height={600}/> */}
     </div>
   );
 }

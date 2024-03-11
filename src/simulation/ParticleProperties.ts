@@ -1,4 +1,4 @@
-import { ParticleGraphicsProps as ParticleGraphicsProps } from "../graphics/ParticleGraphicsProps";
+import { ParticleGraphicsProps as ParticleGraphicsProps } from "../graphics/Particle";
 
 export type ParticlePhysicsProps = {
     mass: number;

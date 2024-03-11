@@ -4,8 +4,9 @@ import { InteractionTable } from "../../simulation/Interactions";
 import { Particle } from "../../simulation/Particle";
 import { ParticlePhysicsProps, ParticleProperties } from "../../simulation/ParticleProperties";
 import { Simulation } from "../../simulation/Simulation";
-import { Vector, sample2DGaussian } from "../../simulation/Utils";
-import { SimulationDimensions, renderCallback } from "../ParticleInit";
+import { Vector, gaussianSample } from "../../simulation/Utils";
+import { SimulationDimensions } from "../ParticleInit";
+import { renderCallback } from "../../graphics/Particle";
 
 const BACKGROUND_REPULSION = -1;
 const BASE_SELF_ATTRACTION = 5;
@@ -134,7 +135,7 @@ export const rnaSimulation = (props: SimulationDimensions, specialProps: rnaSimu
         for (let _ = 0; _ < ct; _++) {
             particles.push(new Particle({
                 properties: particleProperties[index],
-                position: (new Vector(sample2DGaussian(specialProps.initialSpread))),
+                position: (new Vector(gaussianSample(props.dimension, specialProps.initialSpread))),
             }))
         }
     })
@@ -143,7 +144,7 @@ export const rnaSimulation = (props: SimulationDimensions, specialProps: rnaSimu
     return new Simulation({
         dimension: props.dimension,
         stepSize: props.h,
-        boundary: closedCircularBounds(props.globalSize),
+        boundary: closedCircularBounds(props.dimension, props.globalSize),
         particleProperties: particleProperties,
         rule: new InteractionTable({ particleProperties: particleProperties, monopoleTensor: rnaInteractionTensor(specialProps) }),
         particles: particles,

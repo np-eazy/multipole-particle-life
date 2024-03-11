@@ -1,9 +1,9 @@
 import { InteractionTable } from "../../simulation/Interactions";
 import { Moments } from "../../simulation/Physics";
 import { Simulation } from "../../simulation/Simulation";
-import { Vector } from "../../simulation/Utils";
+import { Vector, zeroV } from "../../simulation/Utils";
 import { closedCircularBounds } from "../../simulation/Boundary";
-import { SimulationDimensions, getGaussianDistribution, homogenousProperties } from "../ParticleInit";
+import { SimulationDimensions, getGaussianDistribution as gaussianParticles, homogenousProperties } from "../ParticleInit";
 
 const BACKGROUND_REPULSION = 0;
 const SELF_ATTRACTION = 20;
@@ -22,7 +22,6 @@ export type SnakeSimulationProps = {
     nextAttraction?: number,
     prevRepulsion?: number,
 }
-
 
 export const snakeInteractionTensor = (diversity: number, lambdaRepulsion: number, selfAttraction: number, couplingAttraction: number, couplingRepulsion: number): number[][] => {
     const allInteractions = [];
@@ -46,9 +45,9 @@ export const snakeInteractionTensor = (diversity: number, lambdaRepulsion: numbe
 export const snakeSimulation = (dimensions: SimulationDimensions, props: SnakeSimulationProps) => {
     const particleProperties = homogenousProperties(props.diversity, props.particleSize, { mass: 1, radius: props.particleSize, momentCoefficient: Moments.UNIFORM_SPHERE });
     return new Simulation({
-        dimension: 2,
+        dimension: dimensions.dimension,
         stepSize: dimensions.h,
-        boundary: closedCircularBounds(dimensions.globalSize),
+        boundary: closedCircularBounds(dimensions.dimension, dimensions.globalSize),
         particleProperties: particleProperties,
         rule: new InteractionTable({ particleProperties: particleProperties, monopoleTensor: snakeInteractionTensor(props.diversity, 
             props.backgroundRepulsion ?? BACKGROUND_REPULSION, 
@@ -56,7 +55,7 @@ export const snakeSimulation = (dimensions: SimulationDimensions, props: SnakeSi
             props.nextAttraction ?? NEXT_ATTRACTION, 
             props.prevRepulsion ?? PREV_REPULSION,
         )}),
-        particles: getGaussianDistribution(particleProperties, new Vector([0, 0]), props.particlesPerType, props.particleInitSigma),
+        particles: gaussianParticles(particleProperties, props.particlesPerType, zeroV(dimensions.dimension), props.particleInitSigma),
 
         interactionBound: props.interactionCutoff,
         collisionBound: props.particleSize * 2,

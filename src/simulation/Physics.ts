@@ -1,5 +1,5 @@
 import { Particle } from "./Particle";
-import { Vector, secantApprox } from "./Utils";
+import { Vector } from "./Utils";
 
 export const Moments = {
     UNIFORM_SPHERE: 0.4,

@@ -1,3 +1,4 @@
+
 export class Vector {
     x: number[];
     norm: number | undefined;
@@ -129,14 +130,16 @@ export class Vector {
             [oneMinusCosAngle * xy + zs, cosAngle + oneMinusCosAngle * y * y, oneMinusCosAngle * yz - xs],
             [oneMinusCosAngle * zx - ys, oneMinusCosAngle * yz + xs, cosAngle + oneMinusCosAngle * z * z]
         ];
-
         const rotatedVector = this.x.map((_, i) => 
             this.x.reduce((sum, coord, j) => sum + rotationMatrix[i][j] * coord, 0)
         );
-
         this.x = rotatedVector;
         return this;
     }
+}
+
+export const zeroV = (dimension?: number): Vector => {
+    return new Vector((new Array(dimension)).fill(0));
 }
 
 export class Orientation extends Vector {
@@ -179,27 +182,32 @@ export const getDistance = (v1: number[], v2: number[], square?: boolean): numbe
     return square ? distSquared : Math.sqrt(distSquared);
 }
 
-export const randomNormal2D = (x: number, y: number, sigma: number = 1/3): number => {
-    const factor = 1 / (2 * Math.PI * sigma * sigma);
-    const exponent = -(x*x + y*y) / (2 * sigma * sigma);
-    return factor * Math.exp(exponent);
+export const gaussianSample = (dimension: number, sigma: number): number[] => {
+    let result = [];
+    for (let i = 0; i < dimension; i += 2) {
+        // Generate two uniform random numbers
+        const u1 = Math.random();
+        const u2 = Math.random();
+
+        // Box-Muller transform
+        const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+        const z1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
+
+        // Scale by the desired standard deviation (sigma)
+        result.push(z0 * sigma);
+        if (i + 1 < dimension) {
+            result.push(z1 * sigma);
+        }
+    }
+    return result;
+}
+export const randomNormalV = (dimension: number, sigma: number): Vector => {
+    return new Vector(gaussianSample(dimension, sigma));
+}
+export const randomDirectionV = (dimension: number): Vector => {
+    return (new Vector(gaussianSample(dimension, 1)).normalize());
 }
 
-export const sample2DGaussian = (sigma: number): number[] => {
-    // Generate two uniform random numbers
-    const u1 = Math.random();
-    const u2 = Math.random();
-
-    // Box-Muller transform
-    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-    const z1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
-
-    // Scale by the desired standard deviation (sigma)
-    const x = z0 * sigma;
-    const y = z1 * sigma;
-
-    return [x, y];
-}
 
 export const secantApprox = (fn: Function, x: number, positiveOnly=false, h=1e-9, zeroLim = 1e-12) => {
     if (positiveOnly) {

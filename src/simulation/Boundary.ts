@@ -27,13 +27,13 @@ export class Boundary {
     }
 }
 
-export const closedCircularBounds = (size: number) => new Boundary({
+export const closedCircularBounds = (dimension: number, size: number) => new Boundary({
     equation: (particle: Particle) => {
         const radius = size;
         const inBounds = particle.position.getNorm(true) <= radius * radius;
         return inBounds;
     },
-    globalBounds: new Vector([size * 2, size * 2]),
+    globalBounds: new Vector((new Array(dimension)).fill(size / 2)),
     distanceMetric: (p1: Particle, p2: Particle) => {
         return p1.position.getDistance(p2.position);
     },
@@ -45,14 +45,14 @@ export const closedCircularBounds = (size: number) => new Boundary({
     }
 });
 
-export const openSquareBounds = (size: number) => new Boundary({
+export const openSquareBounds = (dimension: number, size: number) => new Boundary({
     equation: (particle: Particle) => {
         const xSize = size;
         const ySize = size;
         const inBounds = Math.abs(particle.position.x[0]) < xSize && Math.abs(particle.position.x[1]) < ySize;
         return inBounds;
     },
-    globalBounds: new Vector([size * 2, size * 2]),
+    globalBounds: new Vector((new Array(dimension)).fill(size / 2)),
     distanceMetric: (p1: Particle, p2: Particle) => {
         return p1.position.getDistance(p2.position);
     },
@@ -61,13 +61,13 @@ export const openSquareBounds = (size: number) => new Boundary({
     }
 });
 
-export const openCircularBounds = (size: number) => new Boundary({
+export const openCircularBounds = (dimension: number, size: number) => new Boundary({
     equation: (particle: Particle) => {
         const radius = size;
         const inBounds = particle.position.getNorm(true) <= size * size;
         return inBounds;
     },
-    globalBounds: new Vector([size * 2, size * 2]),
+    globalBounds: new Vector((new Array(dimension)).fill(size / 2)),
     distanceMetric: (p1: Particle, p2: Particle) => {
         return p1.position.getDistance(p2.position);
     },

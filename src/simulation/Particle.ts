@@ -1,6 +1,6 @@
-import { ParticleGraphicsProps } from "../graphics/ParticleGraphicsProps";
+import { ParticleGraphicsProps } from "../graphics/Particle";
 import { ParticlePhysicsProps, ParticleProperties } from "./ParticleProperties";
-import { Vector, randomNormal2D } from "./Utils";
+import { Vector, randomDirectionV } from "./Utils";
 
 export class Particle {
     id: string;
@@ -30,14 +30,13 @@ export class Particle {
         this.id = params.id ?? (Date.now() + Math.random() * 100000).toString();
         this.dimension = params.position.x.length;
 
-        // Redundant referencing for easier coding
         this.properties = params.properties;
         this.graphics = params.properties.graphics;
         this.physics = params.properties.physics;
         this.physics.charge = 1;
 
         this.position = params.position;
-        this.orientation = params.velocity ?? (new Vector(new Array(this.dimension).fill(randomNormal2D(0, 0, 1)))).normalize(); // TODO: randomize direction
+        this.orientation = params.velocity ?? randomDirectionV(this.dimension); // TODO: randomize direction
         this.velocity = params.velocity ?? new Vector(this.dimension);
         this.angularVelocity = params.angularVelocity ?? new Vector(this.dimension);
 
