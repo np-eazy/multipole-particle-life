@@ -4,6 +4,7 @@ export type ParticlePhysicsProps = {
     mass: number;
     radius: number;
     momentCoefficient: number;
+    charge?: number;
 }
 
 export const particlePropertiesMap = new Map();

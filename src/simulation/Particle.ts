@@ -1,6 +1,6 @@
 import { ParticleGraphicsProps } from "../graphics/ParticleGraphicsProps";
 import { ParticlePhysicsProps, ParticleProperties } from "./ParticleProperties";
-import { Vector } from "./Utils";
+import { Vector, randomNormal2D } from "./Utils";
 
 export class Particle {
     id: string;
@@ -8,17 +8,24 @@ export class Particle {
     properties: ParticleProperties;
     physics: ParticlePhysicsProps;
     graphics: ParticleGraphicsProps;
+
     position: Vector;
+    orientation: Vector;
     velocity: Vector;
-    forceTorque: Vector;
+    angularVelocity: Vector;
+    force: Vector;
+    torque: Vector;
     deleted: boolean;
 
     constructor(params: {
         id?: string, 
         properties: ParticleProperties, 
         position: Vector, 
+        orientation?: Vector,
         velocity?: Vector, 
-        forceTorque?: Vector
+        angularVelocity?: Vector,
+        force?: Vector,
+        torque?: Vector,
     }) {
         this.id = params.id ?? (Date.now() + Math.random() * 100000).toString();
         this.dimension = params.position.x.length;
@@ -27,25 +34,38 @@ export class Particle {
         this.properties = params.properties;
         this.graphics = params.properties.graphics;
         this.physics = params.properties.physics;
+        this.physics.charge = 1;
 
         this.position = params.position;
+        this.orientation = params.velocity ?? (new Vector(new Array(this.dimension).fill(randomNormal2D(0, 0, 1)))).normalize(); // TODO: randomize direction
         this.velocity = params.velocity ?? new Vector(this.dimension);
-        this.forceTorque = params.forceTorque ?? new Vector(this.dimension);
+        this.angularVelocity = params.angularVelocity ?? new Vector(this.dimension);
+
+        this.force = params.force ?? new Vector(this.dimension);
+        this.torque = params.torque ?? new Vector(this.dimension);
+
         this.deleted = false;
     }
 
     loadForce(force: Vector) {
-        this.forceTorque.addV(force);
-        // TODO: handle torque
+        this.force.addV(force);
+    }
+
+    loadTorque(torque: Vector) {
+        this.torque.addV(torque);
     }
 
     move(h: number) {
-        this.forceTorque.scaleV(h / this.physics.mass);
-        // TODO: handle torque
-        this.velocity.addV(this.forceTorque);
-        this.position.addV(this.velocity);
+        this.force.scaleV(h / this.physics.mass);
+        this.torque.scaleV(h / this.physics.momentCoefficient);
 
-        this.forceTorque = new Vector(this.dimension);
+        this.velocity.addV(this.force);
+        this.angularVelocity.addV(this.torque);
+
+        this.position.addV(this.velocity);
+        this.orientation.rotateV(this.angularVelocity, this.angularVelocity.getNorm());
+
+        this.force = new Vector(this.dimension);
     }
 
     markForDeletion() {

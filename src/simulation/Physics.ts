@@ -1,5 +1,5 @@
 import { Particle } from "./Particle";
-import { Vector } from "./Utils";
+import { Vector, secantApprox } from "./Utils";
 
 export const Moments = {
     UNIFORM_SPHERE: 0.4,
@@ -10,15 +10,17 @@ const baseCoefficient = 5;
 const baseRepulsion = 3;
 const baseRadius = 2;
 const affineOffset = 0;
+const permittivity = 1;
+const charge = 1;
 
-export const baseInteractionPotential = (radius: number, affinity: number): Function => {
+export const monopolePotential = (radius: number, affinity: number): Function => {
     return (r: number): number => {
         const effectiveRadius = r / (baseRadius * radius);
         return baseCoefficient * (baseRepulsion -  ((affinity + affineOffset) * effectiveRadius)) * Math.exp(-effectiveRadius);
     }
 }
 
-export const baseInteractionPotentialDerivative = (radius: number, affinity: number): Function => {
+export const monopolePotentialDerivative = (radius: number, affinity: number): Function => {
     return (r: number): number => {
         const effectiveRadius = r / (baseRadius * radius);
         const totalAffinity = affinity + affineOffset;
@@ -27,6 +29,19 @@ export const baseInteractionPotentialDerivative = (radius: number, affinity: num
     }
 }
 
+export const dipolePotential = (radius: number, affinity: number): Function => {
+    return (r: number, cosine: number,): number => {
+        const effectiveRadius = r / (baseRadius * radius);
+        return -baseCoefficient * affinity * cosine / (effectiveRadius ** 2);
+    }
+}
+
+export const dipolePotentialGradient = (radius: number, charge: number): Function => {
+    return (delta: Vector): Vector => {
+        const r = delta.getNorm();
+        return delta.getTheta().scaleV(charge / (4 * Math.PI * permittivity * ((r / radius) ** 3)));
+    }
+}
 
 export const elasticCollision = (p1: Particle, p2: Particle, restitution: number = 1) => {
     const temp = p2.velocity.copy();

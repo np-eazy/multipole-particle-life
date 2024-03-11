@@ -40,7 +40,39 @@ export class Vector {
         delta.scaleV(1 / delta.getNorm());
         return delta;
     }
-    
+    getCrossProduct(dx: Vector): Vector | number {
+        if (dx.x.length == 3) {
+            return new Vector([
+                this.x[1] * dx.x[2] - this.x[2] * dx.x[1],
+                this.x[2] * dx.x[0] - this.x[0] * dx.x[2],
+                this.x[0] * dx.x[1] - this.x[1] * dx.x[0]
+            ]);
+        } else {
+            return this.x[0] * dx.x[1] - this.x[1] * dx.x[0];
+        }
+        
+    }
+    getTheta(): Vector {
+        return new Vector([
+            Math.cos(Math.atan2(this.x[2], this.x[1])) * Math.sin(Math.acos(this.x[0] / this.getNorm())),
+            Math.sin(Math.atan2(this.x[2], this.x[1])) * Math.sin(Math.acos(this.x[0] / this.getNorm())),
+            Math.cos(Math.acos(this.x[0] / this.getNorm()))
+        ]); // Unit vector in the direction of theta
+    }
+    getSphericalBasis(): Vector[] {
+        const rho = this.normalize(); // Unit vector in the direction of rho
+        const theta = new Vector([
+            Math.cos(Math.atan2(this.x[2], this.x[1])) * Math.sin(Math.acos(this.x[0] / this.getNorm())),
+            Math.sin(Math.atan2(this.x[2], this.x[1])) * Math.sin(Math.acos(this.x[0] / this.getNorm())),
+            Math.cos(Math.acos(this.x[0] / this.getNorm()))
+        ]); // Unit vector in the direction of theta
+        const phi = new Vector([
+            -Math.sin(Math.atan2(this.x[2], this.x[1])),
+            Math.cos(Math.atan2(this.x[2], this.x[1])),
+            0
+        ]); // Unit vector in the direction of phi
+        return [rho, theta, phi];
+    }
 
     // In-place operations
     scaleV(c: number): Vector {
@@ -80,6 +112,29 @@ export class Vector {
             this.x = this.x.map((x_i, i) => x_i + c * dx.x[i]); 
         }
         this.resetCache();
+        return this;
+    }
+    rotateV(axis: Vector, angle: number): Vector {
+        const normAxis = axis.normalize(true);
+        const sinAngle = Math.sin(angle);
+        const cosAngle = Math.cos(angle);
+        const oneMinusCosAngle = 1 - cosAngle;
+
+        const x = normAxis.x[0], y = normAxis.x[1], z = normAxis.x[2];
+        const xy = x * y, yz = y * z, zx = z * x;
+        const xs = x * sinAngle, ys = y * sinAngle, zs = z * sinAngle;
+
+        const rotationMatrix = [
+            [cosAngle + oneMinusCosAngle * x * x, oneMinusCosAngle * xy - zs, oneMinusCosAngle * zx + ys],
+            [oneMinusCosAngle * xy + zs, cosAngle + oneMinusCosAngle * y * y, oneMinusCosAngle * yz - xs],
+            [oneMinusCosAngle * zx - ys, oneMinusCosAngle * yz + xs, cosAngle + oneMinusCosAngle * z * z]
+        ];
+
+        const rotatedVector = this.x.map((_, i) => 
+            this.x.reduce((sum, coord, j) => sum + rotationMatrix[i][j] * coord, 0)
+        );
+
+        this.x = rotatedVector;
         return this;
     }
 }

@@ -22,7 +22,7 @@ export class State {
                 properties: particle.properties,
                 position: particle.position.copy(),
                 velocity: particle.velocity.copy(),
-                forceTorque: particle.forceTorque.copy(),
+                force: particle.force.copy(),
             });
             state.addParticle(p);
         })
@@ -33,7 +33,7 @@ export class State {
         this.t += h;
         other.particles.forEach((particle: Particle) => {
             this.particleMap.get(particle.id)!.position.addScaledV(h, other.particleMap.get(particle.id)!.velocity);
-            this.particleMap.get(particle.id)!.velocity.addScaledV(h / particle.physics.mass, other.particleMap.get(particle.id)!.forceTorque);
+            this.particleMap.get(particle.id)!.velocity.addScaledV(h / particle.physics.mass, other.particleMap.get(particle.id)!.force);
         })
         return this;
     }

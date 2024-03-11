@@ -1,6 +1,6 @@
-import { hueToRgb } from "../graphics/Color";
+import { Color, hueToRgb } from "../graphics/Color";
 import { ParticleGraphicsProps } from "../graphics/ParticleGraphicsProps";
-import { drawCircle } from "../graphics/Shapes";
+import { drawCircle, drawLine } from "../graphics/Shapes";
 import { View } from "../graphics/View";
 import { Particle } from "../simulation/Particle";
 import { ParticlePhysicsProps, ParticleProperties } from "../simulation/ParticleProperties";
@@ -26,13 +26,17 @@ export const getGaussianDistribution = (particleProperties: ParticleProperties[]
     return particles;
 }
 
-export function testParticleRender(ctx: any, graphics: ParticleGraphicsProps, x: number, y: number, zoom: number = 1) {
+const black = new Color(0, 0, 0);
+export function testParticleRender(ctx: any, graphics: ParticleGraphicsProps, x: number, y: number, zoom: number = 1, x1: number, y1: number) {
     drawCircle(ctx, x, y, graphics.size * zoom, graphics.color);
+    drawCircle(ctx, x, y, graphics.size * zoom - 1, black);
+    drawLine(ctx, x, y, x + x1 * (zoom ?? 1), y + y1 * (zoom ?? 1), graphics.color);
 }
 
 export const renderCallback = (ctx: any, particle: Particle, view: View) => {
     const [x, y, z] = view.getRenderCoord(particle.position);
-    testParticleRender(ctx, particle.graphics, x, y, z);
+    const [x1, y1, z1] = particle.dimension == 3 ? view.getRenderCoord(particle.orientation) : [...particle.orientation.x, 0];
+    testParticleRender(ctx, particle.graphics, x, y, z, x1, y1);
 }
 
 export const homogenousProperties = (diversity: number, size: number, physics: ParticlePhysicsProps): ParticleProperties[] => {

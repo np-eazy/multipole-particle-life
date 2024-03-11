@@ -1,6 +1,6 @@
 import { Particle } from "./Particle";
 import { ParticleProperties } from "./ParticleProperties";
-import { baseInteractionPotential, baseInteractionPotentialDerivative } from "./Physics";
+import { dipolePotentialGradient, monopolePotential, monopolePotentialDerivative } from "./Physics";
 import { Vector } from "./Utils";
 
 export const getInteractionId = (prop1: ParticleProperties, prop2: ParticleProperties): string => {
@@ -29,8 +29,8 @@ export class InteractionTable {
                 this.interactions[i][j] = {
                     prop1: prop1, 
                     prop2: prop2, 
-                    potential: baseInteractionPotential(radius, params.monopoleTensor[i][j]),
-                    derivative: baseInteractionPotentialDerivative(radius, params.monopoleTensor[i][j]),
+                    potential: monopolePotential(radius, params.monopoleTensor[i][j]),
+                    derivative: monopolePotentialDerivative(radius, params.monopoleTensor[i][j]),
                     interactionId: getInteractionId(prop1, prop2),
                 };
                 this.interactionMap.set(this.interactions[i][j].interactionId, this.interactions[i][j]);
@@ -39,17 +39,16 @@ export class InteractionTable {
     }
 
     // BOTTLENECK //
-    getForce(p1: Particle, p2: Particle, distance: number): Vector {
-        if (Math.random() < 0.000001) {
-            console.log(
-                p1.properties.index, 
-                p2.properties.index, 
-                getInteractionId(p1.properties, p2.properties),
-                this.interactionMap.get(getInteractionId(p1.properties, p2.properties)), 
-            );
-        }
+    getForce(p1: Particle, p2: Particle, distance: number, delta?: Vector): Vector {
+        if (!delta) delta = p1.position.getDelta(p2.position);
         return p1.position
             .getDelta(p2.position)
             .scaleV(this.interactionMap.get(getInteractionId(p1.properties, p2.properties)).derivative(distance) / distance);
+    }
+
+    getTorque(p1: Particle, p2: Particle, distance: number, delta?: Vector): Vector {
+        if (!delta) delta = p1.position.getDelta(p2.position);
+        return dipolePotentialGradient(delta.getNorm(), p1.physics.charge! * p2.physics.charge!)(delta)
+            .getCrossProduct(delta);
     }
 }
