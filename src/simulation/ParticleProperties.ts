@@ -3,7 +3,7 @@ import { ParticleGraphicsProps as ParticleGraphicsProps } from "../graphics/Part
 export type ParticlePhysicsProps = {
     mass: number;
     radius: number;
-    momentCoefficient: number;
+    momentOfInertia: number;
     charge?: number;
 }
 

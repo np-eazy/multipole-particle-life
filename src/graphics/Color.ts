@@ -10,36 +10,42 @@ export class Color {
         this.b = b;
     }
 
-    set(r: number, b: number, g: number) {
+    set(r: number, b: number, g: number): Color {
         this.r = r;
         this.g = g;
         this.b = b;
         this.hex = undefined;
+        return this;
     }
 
-    add(r: number, b: number, g: number) {
+    add(r: number, b: number, g: number): Color {
         this.r += r;
         this.g += g;
         this.b += b;
         this.hex = undefined;
+        return this;
     }
     
-    clamp() {
+    clamp(): Color {
         this.r = Math.max(0, Math.min(255, this.r));
         this.g = Math.max(0, Math.min(255, this.g));
         this.b = Math.max(0, Math.min(255, this.b));
         return this;
     }
 
-    toHex() {
+    toHex(): string {
         if (this.hex) {
             return this.hex;
         } else {
             this.hex = undefined;
 
         }
-        const conv = (c: number) => c.toString(16).padStart(2, '0');
+        const conv = (c: number) => (Math.round(c)).toString(16).padStart(2, '0');
         return `#${conv(this.r)}${conv(this.g)}${conv(this.b)}`;
+    }
+
+    getScaled(c: any): Color {
+        return new Color(this.r * c, this.g * c, this.b * c).clamp();
     }
 }
 

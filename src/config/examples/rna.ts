@@ -6,7 +6,6 @@ import { ParticlePhysicsProps, ParticleProperties } from "../../simulation/Parti
 import { Simulation } from "../../simulation/Simulation";
 import { Vector, gaussianSample } from "../../simulation/Utils";
 import { SimulationDimensions } from "../ParticleInit";
-import { renderCallback } from "../../graphics/Particle";
 
 const BACKGROUND_REPULSION = -1;
 const BASE_SELF_ATTRACTION = 5;
@@ -82,7 +81,6 @@ export const rnaParticleProperties = (params: rnaSimulationProps): ParticlePrope
             { 
                 color: hueToRgb(i * 90 + hueOffset), 
                 size: params.pairPhysics.radius, 
-                renderCallback: renderCallback, 
             })
         );
     }
@@ -92,7 +90,6 @@ export const rnaParticleProperties = (params: rnaSimulationProps): ParticlePrope
         { 
             color: new Color(50, 50, 50), 
             size: params.chainBinderPhysics.radius, 
-            renderCallback: renderCallback 
         })
     );
     // Pair binder: Hold the otherwise-repulsive base pairs together
@@ -102,7 +99,6 @@ export const rnaParticleProperties = (params: rnaSimulationProps): ParticlePrope
             { 
                 color: hueToRgb(i * 180 + 45 + hueOffset), 
                 size: params.pairBinderPhysics.radius, 
-                renderCallback: renderCallback 
             })
         );
     }
@@ -112,10 +108,8 @@ export const rnaParticleProperties = (params: rnaSimulationProps): ParticlePrope
             { 
                 color: new Color(50, 50, 50), 
                 size: params.pairBinderPhysics.radius, 
-                renderCallback: renderCallback 
             })
         );
-    console.log(properties);
     return properties;
 }
 
@@ -140,7 +134,6 @@ export const rnaSimulation = (props: SimulationDimensions, specialProps: rnaSimu
         }
     })
 
-    console.log(rnaInteractionTensor(specialProps));
     return new Simulation({
         dimension: props.dimension,
         stepSize: props.h,

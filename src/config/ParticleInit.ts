@@ -1,5 +1,4 @@
 import { hueToRgb } from "../graphics/Color";
-import { renderCallback } from "../graphics/Particle";
 import { Particle } from "../simulation/Particle";
 import { ParticlePhysicsProps, ParticleProperties } from "../simulation/ParticleProperties";
 import { Vector, gaussianSample } from "../simulation/Utils";
@@ -17,7 +16,7 @@ export const getGaussianDistribution = (particleProperties: ParticleProperties[]
         for (let j = 0; j < n; j++) {
             particles.push(new Particle({
                 properties: particleProperties[i],
-                position: (new Vector(gaussianSample(center.x.length, n))).addV(center),
+                position: (new Vector(gaussianSample(center.x.length, sigma))).addV(center),
             }))
         }
     }
@@ -32,7 +31,6 @@ export const homogenousProperties = (diversity: number, size: number, physics: P
             { 
                 color: hueToRgb(i * 360 / diversity), 
                 size: size, 
-                renderCallback: renderCallback,
             })
         );
     }

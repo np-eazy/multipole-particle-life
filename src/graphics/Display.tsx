@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Simulation } from "../simulation/Simulation";
 import { Particle } from "../simulation/Particle";
 import { View } from "./View";
+import { renderParticles } from "./Particle";
 
 export type DisplayProps = {
     simulation: Simulation;
@@ -44,11 +45,9 @@ export const Display = (props: any) => {
     const renderSimulation = (particles: Particle[], wasmModule: any, canvas: HTMLCanvasElement | null) => {    
         if (canvas) {
             const ctx = canvas.getContext('2d');
-            if (ctx && particles) {
+            if (ctx && particles && view) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach(particle => {
-                    particle.graphics.renderCallback(ctx, particle, view);
-                });
+                renderParticles(ctx, particles, view);
             }
         }
     };

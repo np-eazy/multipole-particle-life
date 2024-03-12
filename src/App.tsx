@@ -2,25 +2,22 @@ import './App.css';
 import { snakeSimulation } from './config/examples/snake';
 import { Display } from './graphics/Display';
 
-
-
-
 function App() {
   return (
     <div className="App">
       <Display simulation={snakeSimulation(
         {
           globalSize: 50,
-          dimension: 3,
+          dimension: 2,
           interactionCutoff: 50,
           h: 0.01,
         },
         {  
-          interactionCutoff: 20,
-          diversity: 5,
+          interactionCutoff: 100,
+          diversity: 3,
           particleSize: 1,
           particleInitSigma: 50 / 4,
-          particlesPerType: 16,
+          particlesPerType: 100,
         }
       )} turbo={false} width={1200} height={800}/>
       {/* <Display simulation={rnaSimulation(

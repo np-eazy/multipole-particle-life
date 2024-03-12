@@ -17,14 +17,7 @@ export class State {
         const state = new State(this.dimension);
         state.t = this.t;
         this.particles.forEach((particle: Particle) => {
-            const p = new Particle({
-                id: particle.id,
-                properties: particle.properties,
-                position: particle.position.copy(),
-                velocity: particle.velocity.copy(),
-                force: particle.force.copy(),
-            });
-            state.addParticle(p);
+            state.addParticle(particle.copy());
         })
         return state;
     }

@@ -10,11 +10,16 @@ export class Vector {
             this.x = new Array(x).fill(0); 
         }
     }
-    copy() {
+    copy(): Vector {
         return new Vector(this.x.map(x_i => x_i), this.norm);
     }
-    resetCache() {
+    resetCache(): Vector {
         this.norm = undefined;
+        return this;
+    }
+    setTo(v: Vector): Vector {
+        this.x = v.x.map(xi => xi);
+        return this;
     }
 
     // Constructive operations
@@ -26,12 +31,22 @@ export class Vector {
             return Math.sqrt(normSquared);
         }
     }
+    getNormal(): Vector {
+        const norm = this.getNorm();
+        return new Vector(this.x.map((x_i) => x_i / norm));
+    }
     getDistance(other: Vector, squared?: boolean): number {
         const distSquared = this.x.reduce((prev, curr, index) => prev + (other.x[index] - curr) ** 2, 0);
         return squared ? distSquared : Math.sqrt(distSquared);
     }
     getDotX(other: Vector): number {
         return this.x.reduce((sum, component, index) => sum + component * other.x[index], 0);
+    }
+    getSum(other: Vector): Vector {
+        return new Vector(this.x.map((x_i, i) => other.x[i] + x_i)); 
+    }
+    getScaledSum(c: number, other: Vector): Vector {
+        return new Vector(this.x.map((x_i, i) => c * other.x[i] + x_i)); 
     }
     getDelta(other: Vector): Vector {
         return new Vector(this.x.map((x_i, i) => other.x[i] - x_i)); 
@@ -106,6 +121,10 @@ export class Vector {
         return this;
     }
     // If we know that c is very small, cacheDiff allows us to correct the norm using a differential approximation
+    clear(): Vector {
+        this.x = this.x.map(xi => 0);
+        return this;
+    }
     addScaledV(c: number, dx: Vector, cacheDiff?: boolean): Vector {
         if (Array.isArray(dx)) {
             this.x = this.x.map((x_i, i) => x_i + c * dx[i]);
@@ -115,31 +134,56 @@ export class Vector {
         this.resetCache();
         return this;
     }
-    rotateV(axis: Vector, angle: number): Vector {
-        const normAxis = axis.normalize(true);
-        const sinAngle = Math.sin(angle);
-        const cosAngle = Math.cos(angle);
-        const oneMinusCosAngle = 1 - cosAngle;
+    rotateV(angle: number | Vector): Vector {
+        if (typeof angle == "number") {
+            const cosAngle = Math.cos(angle);
+            const sinAngle = Math.sin(angle);
+            if (this.x.length !== 2) {
+                throw new Error("rotate2D is only applicable to 2D vectors.");
+            }
+            const rotatedX = cosAngle * this.x[0] - sinAngle * this.x[1];
+            const rotatedY = sinAngle * this.x[0] + cosAngle * this.x[1];
+            this.x = [rotatedX, rotatedY];
+            return this;
+        } else {
+            const omega = angle.getNorm();
+            const normAxis = angle.getNormal();
+            const sinAngle = Math.sin(omega);
+            const cosAngle = Math.cos(omega);
+            const oneMinusCosAngle = 1 - cosAngle;
 
-        const x = normAxis.x[0], y = normAxis.x[1], z = normAxis.x[2];
-        const xy = x * y, yz = y * z, zx = z * x;
-        const xs = x * sinAngle, ys = y * sinAngle, zs = z * sinAngle;
+            const x = normAxis.x[0], y = normAxis.x[1], z = normAxis.x[2];
+            const xy = x * y, yz = y * z, zx = z * x;
+            const xs = x * sinAngle, ys = y * sinAngle, zs = z * sinAngle;
 
-        const rotationMatrix = [
-            [cosAngle + oneMinusCosAngle * x * x, oneMinusCosAngle * xy - zs, oneMinusCosAngle * zx + ys],
-            [oneMinusCosAngle * xy + zs, cosAngle + oneMinusCosAngle * y * y, oneMinusCosAngle * yz - xs],
-            [oneMinusCosAngle * zx - ys, oneMinusCosAngle * yz + xs, cosAngle + oneMinusCosAngle * z * z]
-        ];
-        const rotatedVector = this.x.map((_, i) => 
-            this.x.reduce((sum, coord, j) => sum + rotationMatrix[i][j] * coord, 0)
-        );
-        this.x = rotatedVector;
-        return this;
+            const rotationMatrix = [
+                [cosAngle + oneMinusCosAngle * x * x, oneMinusCosAngle * xy - zs, oneMinusCosAngle * zx + ys],
+                [oneMinusCosAngle * xy + zs, cosAngle + oneMinusCosAngle * y * y, oneMinusCosAngle * yz - xs],
+                [oneMinusCosAngle * zx - ys, oneMinusCosAngle * yz + xs, cosAngle + oneMinusCosAngle * z * z]
+            ];
+            const rotatedVector = this.x.map((_, i) => 
+                this.x.reduce((sum, coord, j) => sum + rotationMatrix[i][j] * coord, 0)
+            );
+            this.x = rotatedVector;
+            return this;
+        }
+    }
+    getRotatedV(angle: number | Vector) {
+        const [temp1, temp2] = [this.copy(), this.rotateV(angle)];
+        this.setTo(temp1);
+        return temp2;
     }
 }
 
 export const zeroV = (dimension?: number): Vector => {
     return new Vector((new Array(dimension)).fill(0));
+}
+
+export const unitVector2D = (angle: number): Vector => {
+    return new Vector([
+        Math.cos(angle),
+        Math.sin(angle),
+    ]);
 }
 
 export class Orientation extends Vector {

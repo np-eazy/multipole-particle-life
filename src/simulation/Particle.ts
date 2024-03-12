@@ -1,31 +1,34 @@
 import { ParticleGraphicsProps } from "../graphics/Particle";
 import { ParticlePhysicsProps, ParticleProperties } from "./ParticleProperties";
-import { Vector, randomDirectionV } from "./Utils";
+import { Vector, randomDirectionV, randomNormalV, zeroV } from "./Utils";
 
 export class Particle {
     id: string;
     dimension: number;
     properties: ParticleProperties;
     physics: ParticlePhysicsProps;
-    graphics: ParticleGraphicsProps;
 
     position: Vector;
-    orientation: Vector;
     velocity: Vector;
-    angularVelocity: Vector;
     force: Vector;
-    torque: Vector;
+    orientation: number | Vector;
+    angularVelocity: number | Vector;
+    torque: number | Vector;
+
+    graphics: ParticleGraphicsProps;
+    cameraPosition?: Vector;
+
     deleted: boolean;
 
     constructor(params: {
         id?: string, 
         properties: ParticleProperties, 
         position: Vector, 
-        orientation?: Vector,
         velocity?: Vector, 
-        angularVelocity?: Vector,
         force?: Vector,
-        torque?: Vector,
+        orientation?: number | Vector,
+        angularVelocity?: number | Vector,
+        torque?: number | Vector,
     }) {
         this.id = params.id ?? (Date.now() + Math.random() * 100000).toString();
         this.dimension = params.position.x.length;
@@ -33,38 +36,82 @@ export class Particle {
         this.properties = params.properties;
         this.graphics = params.properties.graphics;
         this.physics = params.properties.physics;
-        this.physics.charge = 1;
+        // this.physics.charge = 1;
 
         this.position = params.position;
-        this.orientation = params.velocity ?? randomDirectionV(this.dimension); // TODO: randomize direction
         this.velocity = params.velocity ?? new Vector(this.dimension);
-        this.angularVelocity = params.angularVelocity ?? new Vector(this.dimension);
-
         this.force = params.force ?? new Vector(this.dimension);
-        this.torque = params.torque ?? new Vector(this.dimension);
 
+        if (this.dimension == 2) {
+            this.orientation = params.velocity ?? Math.random() * Math.PI * 2; // TODO: randomize direction
+            this.angularVelocity = params.angularVelocity ?? randomNormalV(1, 1).x[0];
+            this.torque = params.torque ?? 0;
+        } else if (this.dimension == 3) {
+            this.orientation = params.velocity ?? randomDirectionV(this.dimension); // TODO: randomize direction
+            this.angularVelocity = params.angularVelocity ?? randomNormalV(3, 1);
+            this.torque = params.torque ?? zeroV(3);
+        } else {
+            throw new Error("Only dimensions 2 and 3 are supported");
+        }
         this.deleted = false;
+    }
+
+    copy() {
+        if (this.dimension == 2) {
+            return new Particle({
+                id: this.id,
+                properties: this.properties,
+                position: this.position.copy(), 
+                velocity: this.velocity.copy(), 
+                force: this.force.copy(),
+                orientation: this.orientation,
+                angularVelocity: this.angularVelocity,
+                torque: this.torque,
+            })
+        } else {
+            return new Particle({
+                id: this.id,
+                properties: this.properties,
+                position: this.position.copy(), 
+                velocity: this.velocity.copy(), 
+                force: this.force.copy(),
+                orientation: (this.orientation as Vector).copy(),
+                angularVelocity: (this.angularVelocity as Vector).copy(),
+                torque: (this.torque as Vector).copy(),
+            })
+        }
     }
 
     loadForce(force: Vector) {
         this.force.addV(force);
     }
 
-    loadTorque(torque: Vector) {
-        this.torque.addV(torque);
+    loadTorque(torque: Vector | number) {
+        if (typeof torque === 'number' && typeof this.torque === 'number') {
+            this.torque += torque;
+        } else if (torque instanceof Vector && this.torque instanceof Vector) {
+            this.torque.addV(torque);
+        }
     }
 
     move(h: number) {
-        this.force.scaleV(h / this.physics.mass);
-        this.torque.scaleV(h / this.physics.momentCoefficient);
+        this.position.addV(this.velocity.addScaledV(h / this.physics.mass, this.force));
+        this.force.clear();
 
-        this.velocity.addV(this.force);
-        this.angularVelocity.addV(this.torque);
-
-        this.position.addV(this.velocity);
-        this.orientation.rotateV(this.angularVelocity, this.angularVelocity.getNorm());
-
-        this.force = new Vector(this.dimension);
+        if (typeof this.angularVelocity === 'number' 
+        && typeof this.torque === 'number'
+        && typeof this.orientation === 'number') {
+            this.angularVelocity += this.torque * h / this.physics.momentOfInertia;
+            this.orientation += this.angularVelocity;
+            this.torque = 0;
+        } else if (this.angularVelocity instanceof Vector
+            && this.torque instanceof Vector
+            && this.orientation instanceof Vector) {
+            this.orientation.rotateV(
+                this.angularVelocity.addScaledV(h / this.physics.momentOfInertia, this.torque))
+                .normalize();
+            this.torque.clear();
+        }
     }
 
     markForDeletion() {
