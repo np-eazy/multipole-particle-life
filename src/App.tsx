@@ -7,17 +7,21 @@ function App() {
     <div className="App">
       <Display simulation={snakeSimulation(
         {
-          globalSize: 50,
-          dimension: 2,
+          globalSize: 25,
+          dimension: 3,
           interactionCutoff: 50,
-          h: 0.01,
+          h: 0.005,
         },
         {  
-          interactionCutoff: 100,
-          diversity: 3,
+          interactionCutoff: 50,
+          diversity: 4,
           particleSize: 1,
           particleInitSigma: 50 / 4,
-          particlesPerType: 100,
+          particlesPerType: 50,
+          backgroundRepulsion: -20,
+          selfAttraction: 0,
+          nextAttraction: 0,
+          prevRepulsion: 0,
         }
       )} turbo={false} width={1200} height={800}/>
       {/* <Display simulation={rnaSimulation(

@@ -29,12 +29,8 @@ export const snakeInteractionTensor = (diversity: number, lambdaRepulsion: numbe
         const interactions = [];
         for (let j = 0; j < diversity; j++) {
             interactions.push(i == j ? selfAttraction :
-                i == (j + 3) % diversity ? couplingAttraction / 25:
-                i == (j + 2) % diversity ? couplingAttraction / 5:
                 i == (j + 1) % diversity ? couplingAttraction :
-                i == (j - 1) % diversity ? couplingAttraction :
-                i == (j - 2) % diversity ? couplingAttraction / 5:
-                i == (j - 3) % diversity ? couplingAttraction / 25:
+                i == (j - 1) % diversity ? couplingRepulsion :
                 lambdaRepulsion);
         }
         allInteractions.push(interactions);
@@ -43,7 +39,11 @@ export const snakeInteractionTensor = (diversity: number, lambdaRepulsion: numbe
 }
 
 export const snakeSimulation = (dimensions: SimulationDimensions, props: SnakeSimulationProps) => {
-    const particleProperties = homogenousProperties(props.diversity, props.particleSize, { mass: 1, radius: props.particleSize, momentOfInertia: Moments.UNIFORM_SPHERE });
+    const particleProperties = homogenousProperties(props.diversity, 
+        props.particleSize * 0.75, { 
+        mass: 1, 
+        radius: props.particleSize, 
+        momentOfInertia: Moments.UNIFORM_SPHERE });
     return new Simulation({
         dimension: dimensions.dimension,
         stepSize: dimensions.h,

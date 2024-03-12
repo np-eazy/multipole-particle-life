@@ -13,14 +13,22 @@ export type ParticleGraphicsProps = {
 
 const fogDecayConstant = 10;
 export const arrowLength = 1.2;
-export function renderParticleAt(ctx: any, graphics: ParticleGraphicsProps, x: number, y: number, zoom: number = 1, x1?: number, y1?: number, fog?: boolean) {
-    const fogColor = fog ? graphics.color.getScaled(Math.min(1, zoom / fogDecayConstant)) : graphics.color;
-    drawCircle(ctx, x, y, graphics.size * zoom, fogColor.toHex());
-    if (graphics.size * zoom > 1) {
-        drawCircle(ctx, x, y, graphics.size * zoom - 1, "#00000060");
-    }
+export function renderParticleAt(ctx: any, graphics: ParticleGraphicsProps, 
+    x: number, y: number, z: number = 1, 
+    x1?: number, y1?: number, z1?: number, 
+    fog?: boolean) {
+
+    const fogColor = fog ? graphics.color.getScaled(Math.min(1, z / fogDecayConstant)) : graphics.color;
+    // if (graphics.size * z > 1) drawCircle(ctx, x, y, graphics.size * z - 1, "#000000");
     if (x1 != undefined && y1 != undefined) {
+        drawCircle(ctx, x, y, graphics.size * z / 2, fogColor.toHex());
+        drawCircle(ctx, x, y, graphics.size * z / 4, "#ffffff");
+        drawCircle(ctx, x, y, graphics.size * z, fogColor.toHex() + "40");
+        drawCircle(ctx, x1, y1, graphics.size * z1! / 10, fogColor.toHex());
         drawLine(ctx, x, y, x1, y1, fogColor);
+    } else {
+        drawCircle(ctx, x, y, graphics.size * z, fogColor.toHex());
+        if (graphics.size * z > 1) drawCircle(ctx, x, y, graphics.size * z - 1, "#000000");
     }
 }
 
@@ -29,16 +37,17 @@ export const renderParticles = (ctx: any, particles: Particle[], view: View) => 
         particles.forEach((particle: Particle) => {
             view.loadRenderCoord(particle.position, particle);
             const z = view.panningTf.z;
-            const [x1, y1] = view.loadRenderCoord(particle.position.getScaledSum(particle.graphics.size, new Vector([
+            const [x1, y1] = new Vector(view.loadRenderCoord(particle.position.getScaledSum(particle.graphics.size, new Vector([
                 Math.cos(particle.orientation as number), 
                 Math.sin(particle.orientation as number)
-            ])));
+            ])))).normalize().scaleV(z * particle.graphics.size).x;
             renderParticleAt(ctx, particle.graphics,  
                 particle.cameraPosition!.x[0], 
                 particle.cameraPosition!.x[1], 
                 z,
                 x1,
                 y1,
+                0,
                 false,
             );
         })
@@ -48,16 +57,21 @@ export const renderParticles = (ctx: any, particles: Particle[], view: View) => 
         });
         particles
         .sort((p1: Particle, p2: Particle) => p1.cameraPosition!.x[2] - p2.cameraPosition!.x[2])
-        .filter((particle: Particle) => particle.cameraPosition!.x[2] > 0 && particle.cameraPosition!.x[2] < 50)
+        .filter((particle: Particle) => particle.cameraPosition!.x[2] > 0)
         .forEach((particle: Particle) => {
-            const z0: number = particle.cameraPosition!.x[2];
-            const [x1, y1, z1] = view.loadRenderCoord(particle.position.getScaledSum(particle.graphics.size, particle.orientation as Vector));
-            renderParticleAt(ctx, particle.graphics, 
+            const [x1, y1, z1] = view.loadRenderCoord(
+                particle.position
+                    .getSum((particle.orientation as Vector)
+                    .normalize()
+                    .scaleV(particle.graphics.size / 2))
+            );
+            if (z1 > 0) renderParticleAt(ctx, particle.graphics, 
                 particle.cameraPosition!.x[0], 
                 particle.cameraPosition!.x[1], 
                 particle.cameraPosition!.x[2],
-                z0 > z1 ? x1 : undefined,
-                z0 > z1 ? y1 : undefined,
+                x1,
+                y1,
+                z1,
                 true,
             );
         })

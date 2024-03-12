@@ -22,6 +22,7 @@ export type ViewProps = {
     sim: Simulation, 
     windowHeight: number, 
     windowWidth: number,
+    startingZoom?: number,
 }
 
 export class View {
@@ -36,13 +37,13 @@ export class View {
         this.dimension = props.sim.dimension;
         this.panningTf = {
             center: new Vector([props.windowWidth / 2, props.windowHeight / 2].concat((new Array(this.dimension - 2))?.fill(0) ?? [])),
-            z: windowZoom,
+            z: windowZoom * (props.startingZoom ?? 1),
         }
         this.cameraTf = props.sim.dimension == 3 ? {
             camx: 0,
-            camy: 0,
-            camz: props.sim.boundary.globalBounds.x[2],
-            fov: 0.5 * Math.PI,
+            camy: - props.sim.boundary.globalBounds.x[2] * 2,
+            camz: 0,
+            fov: Math.PI / 8,
             theta: -0.5 * Math.PI,
             phi: -0.5 * Math.PI,
             yaw: 0,
@@ -51,6 +52,8 @@ export class View {
     loadRenderCoord(globalPosition: Vector, parent?: Particle): number[] {
         const projection: Vector = this.cameraTf != undefined ? cameraTransformation(globalPosition.x, this.cameraTf) : globalPosition;
         const affine: Vector = this.panningTf != undefined ? affineTransformation(projection, this.panningTf) : projection;
+        // this.cameraTf!.phi += 0.00001;
+
         if (parent) parent.cameraPosition = affine;
         return affine.x;
     }
@@ -75,7 +78,7 @@ const cameraTransformation = (globalPosition: number[], cameraTf: cameraTf, pare
     const fovFactor = 1.0 / Math.tan(cameraTf.fov / 2);
     const sx = fovFactor * (dxTheta / dzPhi);
     const sy = fovFactor * (dyPhi / dzPhi);
-    const sz = dzPhi;
+    const sz = dzPhi / fovFactor;
 
     const output = new Vector([sx, sy, -1 / sz])
     if (parent && parent.dimension > 2) parent.cameraPosition = new Vector([sx, sy, -1 / sz]);

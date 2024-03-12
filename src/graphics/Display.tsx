@@ -23,6 +23,7 @@ export const Display = (props: any) => {
             sim: simulation,
             windowWidth: props.width,
             windowHeight: props.height,
+            startingZoom: props.simulation.dimension == 3 ? 5 : 1,
         });
         setView(view);
     }, []);
