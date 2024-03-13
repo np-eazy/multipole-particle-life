@@ -66,14 +66,19 @@ export class Vector {
         } else {
             return this.x[0] * dx.x[1] - this.x[1] * dx.x[0];
         }
-        
     }
     getTheta(): Vector {
-        return new Vector([
-            Math.cos(Math.atan2(this.x[2], this.x[1])) * Math.sin(Math.acos(this.x[0] / this.getNorm())),
-            Math.sin(Math.atan2(this.x[2], this.x[1])) * Math.sin(Math.acos(this.x[0] / this.getNorm())),
-            Math.cos(Math.acos(this.x[0] / this.getNorm()))
-        ]); // Unit vector in the direction of theta
+        if (this.x.length == 3) {
+            const phi = (new Vector([
+                this.x[0] ?? 1,
+                this.x[1] ?? 1,
+                0,
+            ]));
+            phi.normalize(); // .normalize();// .rotateV(new Vector([0, 0, Math.PI / 2])); // Unit vector in the direction of phi
+            return phi; // this.getNormal().getRotatedV(phi.scaleV(Math.PI / 2)); 
+        } else {
+            return this.getRotatedV(-Math.PI / 2).normalize();
+        }
     }
     getSphericalBasis(): Vector[] {
         const rho = this.normalize(); // Unit vector in the direction of rho
@@ -135,7 +140,7 @@ export class Vector {
         return this;
     }
     rotateV(angle: number | Vector): Vector {
-        if (typeof angle == "number") {
+        if (typeof angle === 'number') {
             const cosAngle = Math.cos(angle);
             const sinAngle = Math.sin(angle);
             if (this.x.length !== 2) {
@@ -145,16 +150,17 @@ export class Vector {
             const rotatedY = sinAngle * this.x[0] + cosAngle * this.x[1];
             this.x = [rotatedX, rotatedY];
             return this;
-        } else {
-            const omega = angle.getNorm();
-            const normAxis = angle.getNormal();
-            const sinAngle = Math.sin(omega);
-            const cosAngle = Math.cos(omega);
-            const oneMinusCosAngle = 1 - cosAngle;
+        } else if (angle instanceof Vector) {
+            const omega: number = angle.getNorm();
+            const normAxis: Vector = angle.getNormal();
+            const sinAngle: number = Math.sin(omega);
+            const cosAngle: number = Math.cos(omega);
+            const oneMinusCosAngle: number = 1 - cosAngle;
 
             const x = normAxis.x[0], y = normAxis.x[1], z = normAxis.x[2];
             const xy = x * y, yz = y * z, zx = z * x;
-            const xs = x * sinAngle, ys = y * sinAngle, zs = z * sinAngle;
+            const xs = x * sinAngle; 
+            const ys = y * sinAngle, zs = z * sinAngle;
 
             const rotationMatrix = [
                 [cosAngle + oneMinusCosAngle * x * x, oneMinusCosAngle * xy - zs, oneMinusCosAngle * zx + ys],
@@ -166,12 +172,12 @@ export class Vector {
             );
             this.x = rotatedVector;
             return this;
+        } else {
+            return this;
         }
     }
     getRotatedV(angle: number | Vector) {
-        const [temp1, temp2] = [this.copy(), this.rotateV(angle)];
-        this.setTo(temp1);
-        return temp2;
+        return this.copy().rotateV(angle);
     }
 }
 

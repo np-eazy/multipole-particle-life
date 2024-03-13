@@ -47,8 +47,8 @@ export class InteractionTable {
     }
 
     getTorque(p1: Particle, p2: Particle, distance: number, delta?: Vector): Vector {
-        if (!delta) delta = p1.position.getDelta(p2.position);
-        return dipolePotentialGradient(delta.getNorm(), p1.physics.charge! * p2.physics.charge!)(delta)
+        const dx = p1.position.getDelta(p2.position);        
+        return (dipolePotentialGradient(p2)(dx))
             .getCrossProduct(delta);
     }
 }

@@ -71,7 +71,7 @@ export const rnaInteractionTensor = (system: rnaSimulationProps) => {
     ];
 }
 
-const hueOffset = 1;
+const hueOffset = 45;
 export const rnaParticleProperties = (params: rnaSimulationProps): ParticleProperties[] => {
     // Nucleotides
     const properties: ParticleProperties[] = [];
