@@ -35,6 +35,7 @@ export const Display = (props: any) => {
             intervalId = setInterval(() => {
                 simulation.rk4Step();
                 renderSimulation(simulation.state.particles, undefined, canvasRef.current);
+                view?.updateCameraPosition();
             }, props.turbo ? 0 : 1000 * simulation.h); 
         }
         return () => {

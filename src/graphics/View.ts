@@ -30,6 +30,13 @@ export class View {
     dimension: number;
     panningTf: affineTf;
     cameraTf?: cameraTf;
+    xvelocity: number;
+    yvelocity: number;
+    zvelocity: number;
+    damping: number;
+    acceleration: number;
+    toggleRotate: boolean;
+    rotateSensitivity: number;
 
     constructor(props: ViewProps) {
         this.parent = props.sim;
@@ -41,21 +48,183 @@ export class View {
         }
         this.cameraTf = props.sim.dimension == 3 ? {
             camx: 0,
-            camy: - props.sim.boundary.globalBounds.x[2] * 2,
+            camy: 0,
             camz: 0,
             fov: Math.PI / 8,
             theta: -0.5 * Math.PI,
-            phi: -0.5 * Math.PI,
+            phi: 0 * Math.PI,
             yaw: 0,
         } : undefined;
+        this.xvelocity = 0;
+        this.yvelocity = 0;
+        this.zvelocity = 0;
+        this.damping = 0.9;
+        this.toggleRotate = false;
+        this.acceleration = 1;
+        this.rotateSensitivity = 0.02;
+        this.initListeners();
+        this.initMouseListeners();
     }
     loadRenderCoord(globalPosition: Vector, parent?: Particle): number[] {
         const projection: Vector = this.cameraTf != undefined ? cameraTransformation(globalPosition.x, this.cameraTf) : globalPosition;
         const affine: Vector = this.panningTf != undefined ? affineTransformation(projection, this.panningTf) : projection;
-        // this.cameraTf!.phi += 0.00001;
 
         if (parent) parent.cameraPosition = affine;
         return affine.x;
+    }
+
+    initListeners() {
+        document.addEventListener('keydown', (event) => {
+          switch (event.key) {
+            case 'w':
+            case 'W':
+              this.moveForward();
+              break;
+            case 'a':
+            case 'A':
+              this.moveLeft();
+              break;
+            case 's':
+            case 'S':
+              this.moveBackward();
+              break;
+            case 'd':
+            case 'D':
+              this.moveRight();
+              break;
+            default:
+              break;
+          }
+        });
+      }
+    
+    initMouseListeners() {
+        let lastX: number | null = null;
+        let lastY: number | null = null;
+    
+        document.addEventListener('mousemove', (event) => {
+            if (lastX !== null && lastY !== null) {
+                const deltaX = event.clientX - lastX;
+                const deltaY = event.clientY - lastY;
+                if (this.cameraTf && this.toggleRotate) {
+                    this.cameraTf.theta += deltaX * this.rotateSensitivity * this.cameraTf.fov; // Adjust sensitivity as needed
+                    this.cameraTf.phi += deltaY * this.rotateSensitivity * this.cameraTf.fov; // Adjust sensitivity as needed
+                }
+            }
+            lastX = event.clientX;
+            lastY = event.clientY;
+        });
+
+        document.addEventListener('click', () => {
+            this.toggleRotate = !this.toggleRotate; // Toggle the boolean value
+            this.rotateSensitivity = this.toggleRotate ? 0.02 : 0; // Adjust rotateSensitivity based on toggleRotate
+        });
+
+    document.addEventListener('wheel', (event) => {
+        if (this.cameraTf && this.toggleRotate) {
+            const zoomIntensity = 0.1;
+            this.cameraTf.fov -= event.deltaY * zoomIntensity * this.rotateSensitivity;
+            this.cameraTf.fov = Math.max(0.1, Math.min(Math.PI / 2, this.cameraTf.fov));
+        }
+    });
+
+    }
+
+    moveUp(): void {
+        const upVector = this.calculateUpVector();
+        if (this.cameraTf) {
+            this.xvelocity += upVector.x * this.acceleration;
+            this.yvelocity += upVector.y * this.acceleration;
+            this.zvelocity += upVector.z * this.acceleration;
+        }
+    }
+
+    moveDown(): void {
+        const upVector = this.calculateUpVector();
+        if (this.cameraTf) {
+            this.xvelocity -= upVector.x * this.acceleration;
+            this.yvelocity -= upVector.y * this.acceleration;
+            this.zvelocity -= upVector.z * this.acceleration;
+        }
+    }
+
+    moveLeft(): void {
+        const rightVector = this.calculateRightVector();
+        if (this.cameraTf) {
+            this.xvelocity -= rightVector.x * this.acceleration;
+            this.yvelocity -= rightVector.y * this.acceleration;
+            this.zvelocity -= rightVector.z * this.acceleration;
+        }
+    }
+
+    moveRight(): void {
+        const rightVector = this.calculateRightVector();
+        if (this.cameraTf) {
+            this.xvelocity += rightVector.x * this.acceleration;
+            this.yvelocity += rightVector.y * this.acceleration;
+            this.zvelocity += rightVector.z * this.acceleration;
+        }
+    }
+
+    moveForward(): void {
+        const forwardVector = this.calculateForwardVector();
+        if (this.cameraTf) {
+            this.xvelocity += forwardVector.x * this.acceleration;
+            this.yvelocity += forwardVector.y * this.acceleration;
+            this.zvelocity += forwardVector.z * this.acceleration;
+        }
+    }
+
+    moveBackward(): void {
+        const forwardVector = this.calculateForwardVector();
+        if (this.cameraTf) {
+            this.xvelocity -= forwardVector.x * this.acceleration;
+            this.yvelocity -= forwardVector.y * this.acceleration;
+            this.zvelocity -= forwardVector.z * this.acceleration;
+        }
+    }
+
+    updateCameraPosition(): void {
+        if (this.cameraTf) {
+            this.cameraTf.camx += this.xvelocity;
+            this.cameraTf.camy += this.yvelocity;
+            this.cameraTf.camz += this.zvelocity;
+            this.cameraTf.phi = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.cameraTf.phi));
+        }
+        this.xvelocity *= this.damping;
+        this.yvelocity *= this.damping;
+        this.zvelocity *= this.damping;
+    }
+
+    private calculateUpVector(): { x: number, y: number, z: number } {
+        // Assuming up is in the direction of the world's y-axis
+        return { x: 0, y: 0, z: 1 };
+    }
+
+    private calculateRightVector(): { x: number, y: number, z: number } {
+        // Calculate right vector based on theta
+        if (this.cameraTf) {
+            const theta = this.cameraTf.theta;
+            return {
+                x: Math.cos(theta + Math.PI / 2),
+                y: Math.sin(theta + Math.PI / 2),
+                z: 0 // Assuming movement in the x-y plane
+            };
+        }
+        return { x: 0, y: 0, z: 0 };
+    }
+
+    private calculateForwardVector(): { x: number, y: number, z: number } {
+        if (this.cameraTf) {
+            const theta = this.cameraTf.theta;
+            const phi = this.cameraTf.phi;
+            return {
+                x: -Math.cos(phi) * Math.cos(theta),
+                y: Math.cos(phi) * Math.sin(theta),
+                z: -Math.sin(phi)
+            };
+        }
+        return { x: 0, y: 0, z: 0 };
     }
 }
 

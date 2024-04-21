@@ -29,7 +29,7 @@ export class Boundary {
 
 export const closedCircularBounds = (dimension: number, size: number) => new Boundary({
     equation: (particle: Particle) => {
-        const radius = size;
+        const radius = size * 100;
         const inBounds = particle.position.getNorm(true) <= radius * radius;
         return inBounds;
     },
@@ -41,7 +41,7 @@ export const closedCircularBounds = (dimension: number, size: number) => new Bou
         particle.position.normalize();
         reflect(particle.velocity, particle.position);
         particle.velocity.scaleV(0.75);
-        particle.position.normalize().scaleV(size);
+        particle.position.normalize().scaleV(size * 100);
     }
 });
 

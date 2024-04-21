@@ -1,27 +1,17 @@
 import './App.css';
+import { nucleusSimulation } from './config/examples/nucleus';
 import { snakeSimulation } from './config/examples/snake';
 import { Display } from './graphics/Display';
 
 function App() {
   return (
     <div className="App">
-      <Display simulation={snakeSimulation(
+      <Display simulation={nucleusSimulation(
         {
           globalSize: 25,
           dimension: 3,
           interactionCutoff: 50,
           h: 0.005,
-        },
-        {  
-          interactionCutoff: 50,
-          diversity: 4,
-          particleSize: 1,
-          particleInitSigma: 50 / 4,
-          particlesPerType: 50,
-          backgroundRepulsion: -20,
-          selfAttraction: 0,
-          nextAttraction: 0,
-          prevRepulsion: 0,
         }
       )} turbo={false} width={1200} height={800}/>
       {/* <Display simulation={rnaSimulation(
