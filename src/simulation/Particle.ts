@@ -36,19 +36,19 @@ export class Particle {
         this.properties = params.properties;
         this.graphics = params.properties.graphics;
         this.physics = params.properties.physics;
-        this.physics.charge = 0.1;
+        this.physics.charge = 1;
 
         this.position = params.position;
         this.velocity = params.velocity ?? new Vector(this.dimension);
         this.force = params.force ?? new Vector(this.dimension);
 
         if (this.dimension == 2) {
-            this.orientation = params.orientation ?? Math.random() * Math.PI * 2; // TODO: randomize direction
-            this.angularVelocity = params.angularVelocity ?? randomNormalV(1, 1).x[0] * 0; 
+            this.orientation = params.velocity ?? Math.random() * Math.PI * 2; // TODO: randomize direction
+            this.angularVelocity = params.angularVelocity ?? randomNormalV(1, 1).x[0] * 1; 
             this.torque = params.torque ?? 0;
         } else if (this.dimension == 3) {
-            this.orientation = params.orientation ?? randomDirectionV(this.dimension); // TODO: randomize direction
-            this.angularVelocity = params.angularVelocity ?? randomNormalV(3, 1).scaleV(0);
+            this.orientation = params.velocity ?? randomDirectionV(this.dimension); // TODO: randomize direction
+            this.angularVelocity = params.angularVelocity ?? randomNormalV(3, 1).scaleV(0.1);
             this.torque = params.torque ?? zeroV(3);
         } else {
             throw new Error("Only dimensions 2 and 3 are supported");
@@ -64,9 +64,9 @@ export class Particle {
                 position: this.position.copy(), 
                 velocity: this.velocity.copy(), 
                 force: this.force.copy(),
-                orientation: this.orientation as number,
-                angularVelocity: this.angularVelocity as number,
-                torque: this.torque as number,
+                orientation: this.orientation,
+                angularVelocity: this.angularVelocity,
+                torque: this.torque,
             })
         } else {
             return new Particle({
@@ -98,17 +98,20 @@ export class Particle {
         this.position.addV(this.velocity.addScaledV(h / this.physics.mass, this.force));
         this.force.clear();
 
-        if (this.dimension == 2) {
-            this.angularVelocity = (this.angularVelocity as number) + (this.torque as number) * h / this.physics.momentOfInertia;
-            this.orientation = (this.orientation as number) + this.angularVelocity;
+        if (typeof this.angularVelocity === 'number' 
+        && typeof this.torque === 'number'
+        && typeof this.orientation === 'number') {
+            this.angularVelocity += this.torque * h / this.physics.momentOfInertia;
+            this.orientation += this.angularVelocity;
             this.torque = 0;
-        } else if (this.dimension == 3) {
-            console.log("4", this.angularVelocity);
-            (this.angularVelocity as Vector).addScaledV(h / this.physics.momentOfInertia, this.torque as Vector);
-            (this.orientation as Vector)
+        } else if (this.angularVelocity instanceof Vector
+            && this.torque instanceof Vector
+            && this.orientation instanceof Vector) {
+            // this.angularVelocity.addScaledV(h / this.physics.momentOfInertia, this.torque);
+            this.orientation
                 .rotateV(this.angularVelocity)
                 .normalize();
-            (this.torque as Vector).clear();
+            this.torque.clear();
         }
     }
 

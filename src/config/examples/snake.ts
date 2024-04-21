@@ -40,10 +40,10 @@ export const snakeInteractionTensor = (diversity: number, lambdaRepulsion: numbe
 
 export const snakeSimulation = (dimensions: SimulationDimensions, props: SnakeSimulationProps) => {
     const particleProperties = homogenousProperties(props.diversity, 
-        props.particleSize, { 
+        props.particleSize * 0.75, { 
         mass: 1, 
         radius: props.particleSize, 
-        momentOfInertia: Moments.NORMAL });
+        momentOfInertia: Moments.UNIFORM_SPHERE });
     return new Simulation({
         dimension: dimensions.dimension,
         stepSize: dimensions.h,

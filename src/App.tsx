@@ -1,63 +1,60 @@
 import './App.css';
-import { rnaSimulation } from './config/examples/rna';
 import { snakeSimulation } from './config/examples/snake';
 import { Display } from './graphics/Display';
-import { Moments } from './simulation/Physics';
 
 function App() {
   return (
     <div className="App">
-      {/* <Display simulation={snakeSimulation(
+      <Display simulation={snakeSimulation(
         {
-          globalSize: 250,
+          globalSize: 25,
           dimension: 3,
-          interactionCutoff: 25 / 4,
-          h: 0.1,
+          interactionCutoff: 50,
+          h: 0.005,
         },
         {  
-          diversity: 1,
-          interactionCutoff: 25,
-          particlesPerType: 2,
-
-          particleSize: 0.5,
+          interactionCutoff: 50,
+          diversity: 4,
+          particleSize: 1,
           particleInitSigma: 50 / 4,
-          backgroundRepulsion: -10,
-          selfAttraction: 10,
-          nextAttraction: 10,
-          prevRepulsion: 5,
+          particlesPerType: 50,
+          backgroundRepulsion: -20,
+          selfAttraction: 0,
+          nextAttraction: 0,
+          prevRepulsion: 0,
         }
-      )} turbo={false} width={1200} height={800}/> */}
-      <Display simulation={rnaSimulation(
+      )} turbo={false} width={1200} height={800}/>
+      {/* <Display simulation={rnaSimulation(
         {
-          globalSize: 50,
-          dimension: 3,
-          interactionCutoff: 50 / 4,
-          h: 0.001,
+          globalSize: 25,
+          dimension: 2,
+          interactionCutoff: 10,
+          h: 0.01,
         },
         {
-          interactionCutoff: 10,
+          interactionCutoff: 50,
           collisionCutoff: 4,
 
-          pairCt: 100,
-          chainBinderCt: 0,
-          pairBinderCt: 0,
+          pairCt: Math.round(2 * 25 / 16),
+          chainBinderCt: Math.round(2 * 100 / 16),
+          pairBinderCt: 50,
           shellCt: 0,
-        
-          universalRepulsion: 2,
+
           basePairSelfAttraction: 10,
           basePairRepulsion: -10,
+
           chainBinderSelfAttraction: -1,
           chainBinderStrength: 10,
           // pairBinderStrength: 1,
 
-          pairPhysics: { mass: 1, radius: 5, momentOfInertia: Moments.NORMAL },
-          chainBinderPhysics: { mass: 1, radius: 0.25, momentOfInertia: Moments.NORMAL },
-          pairBinderPhysics: { mass: 1, radius: 0.25, momentOfInertia: Moments.NORMAL },
-          shellPhysics: { mass: 0.1, radius: 0.5, momentOfInertia: Moments.NORMAL },
+          pairPhysics: { mass: 4, radius: 0.5, momentCoefficient: Moments.UNIFORM_SPHERE },
+          chainBinderPhysics: { mass: 1, radius: 0.25, momentCoefficient: Moments.UNIFORM_SPHERE },
+          pairBinderPhysics: { mass: 1, radius: 0.25, momentCoefficient: Moments.UNIFORM_SPHERE },
+          shellPhysics: { mass: 0.1, radius: 0.5, momentCoefficient: Moments.UNIFORM_SPHERE },
           
           initialSpread: 25,
         }
-      )} turbo={true} width={1200} height={800}/>
+      )} turbo={true} width={600} height={600}/> */}
     </div>
   );
 }

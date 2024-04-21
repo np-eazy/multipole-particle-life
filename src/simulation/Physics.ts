@@ -2,7 +2,7 @@ import { Particle } from "./Particle";
 import { Vector } from "./Utils";
 
 export const Moments = {
-    NORMAL: 1,
+    UNIFORM_SPHERE: 0.4,
 }
 
 // Tuning Parameters
@@ -11,6 +11,7 @@ const baseRepulsion = 3;
 const baseRadius = 2;
 const affineOffset = 0;
 const permittivity = 1;
+const charge = 1;
 
 export const monopolePotential = (radius: number, affinity: number): Function => {
     return (r: number): number => {
@@ -35,19 +36,10 @@ export const dipolePotential = (radius: number, affinity: number): Function => {
     }
 }
 
-const r0 = 5;
-const CARDINAL = new Vector([1, 0, 0]);
-
-export const dipolePotentialGradient = (p2: Particle): Function => {
-    return (r: Vector): Vector => {
-        return r
-            .getRotatedV(p2.dimension == 2 ? // Rotate into the 2nd particle's frame of reference
-                (p2.orientation as number) * -1 : // 2d case: orientation is vector
-                CARDINAL.getCrossProduct(  // 3d case: use e1 x p2's direction to get rotation axis to bring r into p2's frame
-                    p2.orientation as Vector
-                )).scaleV(-1)
-            .getTheta() // Using ideal dipole
-            .scaleV(p2.physics.charge! / (4 * Math.PI * permittivity * ((r.getNorm() / r0) ** 3))); // Coulomb's Law at low velocity limit
+export const dipolePotentialGradient = (radius: number, charge: number): Function => {
+    return (delta: Vector): Vector => {
+        const r = delta.getNorm();
+        return delta.getTheta().scaleV(charge / (4 * Math.PI * permittivity * ((r / radius) ** 3)));
     }
 }
 

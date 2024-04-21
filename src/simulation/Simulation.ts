@@ -56,8 +56,10 @@ export class Simulation {
             p1.loadForce(this.rule.getForce(p1, p2, distance, delta));
             p2.loadForce(this.rule.getForce(p2, p1, distance, delta));
             // TODO: Generate dipole pairwise interactions by first filtering the charged particles
-            p1.loadTorque(this.rule.getTorque(p1, p2, distance, delta));
-            p2.loadTorque(this.rule.getTorque(p2, p1, distance, delta));        
+            if (p1.physics.charge && p2.physics.charge) {
+                p1.loadTorque(this.rule.getTorque(p1, p2, distance, delta));
+                p2.loadTorque(this.rule.getTorque(p2, p1, distance, delta));        
+            }
         });
         currState.particles.forEach((particle: Particle) => {
             particle.move(h);
@@ -71,8 +73,6 @@ export class Simulation {
             [...state.getPairs(this.interactionBound)].forEach(({p1, p2, distance}: { p1: Particle, p2: Particle, distance: number}) => {
                 p1.loadForce(this.rule.getForce(p1, p2, distance));
                 p2.loadForce(this.rule.getForce(p2, p1, distance));
-                p1.loadTorque(this.rule.getTorque(p1, p2, distance, p1.position.getDelta(p2.position)));
-                p2.loadTorque(this.rule.getTorque(p2, p1, distance, p2.position.getDelta(p1.position)));        
             });
         };
     

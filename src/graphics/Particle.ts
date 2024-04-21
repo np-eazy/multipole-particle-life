@@ -11,7 +11,7 @@ export type ParticleGraphicsProps = {
     size: number;
 }
 
-const fogDecayConstant = 20;
+const fogDecayConstant = 10;
 export const arrowLength = 1.2;
 export function renderParticleAt(ctx: any, graphics: ParticleGraphicsProps, 
     x: number, y: number, z: number = 1, 
@@ -21,9 +21,9 @@ export function renderParticleAt(ctx: any, graphics: ParticleGraphicsProps,
     const fogColor = fog ? graphics.color.getScaled(Math.min(1, z / fogDecayConstant)) : graphics.color;
     // if (graphics.size * z > 1) drawCircle(ctx, x, y, graphics.size * z - 1, "#000000");
     if (x1 != undefined && y1 != undefined) {
+        drawCircle(ctx, x, y, graphics.size * z / 2, fogColor.toHex());
+        drawCircle(ctx, x, y, graphics.size * z / 4, "#ffffff");
         drawCircle(ctx, x, y, graphics.size * z, fogColor.toHex() + "40");
-        drawCircle(ctx, x, y, graphics.size * z / 2, fogColor.toHex() + "80");
-        drawCircle(ctx, x, y, graphics.size * z / 4, fogColor.toHex());
         drawCircle(ctx, x1, y1, graphics.size * z1! / 10, fogColor.toHex());
         drawLine(ctx, x, y, x1, y1, fogColor);
     } else {
@@ -37,17 +37,17 @@ export const renderParticles = (ctx: any, particles: Particle[], view: View) => 
         particles.forEach((particle: Particle) => {
             view.loadRenderCoord(particle.position, particle);
             const z = view.panningTf.z;
-            const [x1, y1] = view.loadRenderCoord(particle.position.getScaledSum(particle.graphics.size, new Vector([
+            const [x1, y1] = new Vector(view.loadRenderCoord(particle.position.getScaledSum(particle.graphics.size, new Vector([
                 Math.cos(particle.orientation as number), 
                 Math.sin(particle.orientation as number)
-            ])));
+            ])))).normalize().scaleV(z * particle.graphics.size).x;
             renderParticleAt(ctx, particle.graphics,  
                 particle.cameraPosition!.x[0], 
                 particle.cameraPosition!.x[1], 
                 z,
                 x1,
                 y1,
-                z,
+                0,
                 false,
             );
         })
